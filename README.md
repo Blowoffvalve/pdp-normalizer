@@ -4,6 +4,7 @@ This repository holds the contract for the normalized data model (GitHub issue #
 - which tables exist, and each column's type and keys
 - where every column of the two mock Analysis-Ready Files goes
 - what a valid stored value looks like
+- how two example enrichment files feed in
 
 Build against it now. The rest of the pipeline, which loads full data, comes later in Milestone 2.
 
@@ -15,8 +16,11 @@ Build against it now. The rest of the pipeline, which loads full data, comes lat
 | `config/value_sets.yaml` | Value lists that several columns share, such as `yes_no` and `academic_term`. Rules refer to them by name. |
 | `config/cohort_mapping.yaml` | Where each of the 85 cohort-file columns goes. |
 | `config/course_mapping.yaml` | Where each of the 35 course-file columns goes. |
+| `config/on_campus_housing_mapping.yaml` | Where the on-campus housing enrichment goes (`student_attribute`). |
+| `config/institution_events_mapping.yaml` | Where the institution events enrichment goes (`institution_event`). |
 | `normalized-data-model.mmd` | The ER diagram, in Mermaid. A picture of `destination_schema.yaml`; a test keeps the two in step. |
-| `data/input/` | The mock Analysis-Ready Files (copies of the starter repo's `data/raw/`, checked by checksum). |
+| `data/input/` | The mock Analysis-Ready Files (copies of the starter repo's `data/raw/`, checked by checksum) and the two enrichment files. |
+| `src/generator/enrichment/on_campus_housing.py` | Generates the synthetic on-campus housing file. |
 | `src/rules/rules.py` | Reads and checks the configs, and applies them to one value. |
 
 ## The tables
@@ -75,6 +79,7 @@ course_enrollment:
 The other parts of a mapping entry:
 - **`on_conflict`** says what happens when the row already exists and already holds a value: `replace` overwrites it, `keep` leaves it, `append` keeps it and adds the new value. For example, the course file repeats each student's gender, which the cohort file already wrote, so that entry is `keep`.
 - **`must_exist: true`** means the row must already have been written by another file in the same run. The course file's student and cohort must be in the cohort file.
+- **`value:`** replaces `source:` when every row gets the same fixed value, such as `attribute_key: uses_on_campus_housing`.
 - **`dropped:`** marks a source column with no destination, with the reason (only `researchid` today).
 
 ## Rule kinds
@@ -118,15 +123,18 @@ Every rule is `error` for now. The validator layer sets the ones the mock data b
 - **`UNKNOWN` means the file said it doesn't know; blank means it said nothing.** In text columns, the codes the dictionaries define as unknown or missing (`UK`, `Unknown`, `-1` where it means unknown, `M = Missing`, `MISSING`) are stored as `UNKNOWN`. Codes the dictionaries don't define, such as Pell's `U`, stay as written and fail their rule. In number, date and true/false columns both are blank.
 - **Two `Race` labels are repaired.** The mock files cut them at 25 characters; they're stored in full (2,023 rows across both files).
 - **The course file's `Cohort_Term` often disagrees with the cohort file.** The cohort file's value is kept. Why it disagrees is an open question for Dena (/dev/color).
-- **The mock data has no institution column.** Everything belongs to one placeholder institution.
+- **The mock data has no institution column.** Everything belongs to one placeholder institution, and the two example events come from two real colleges: Leech Lake Tribal College and United Tribes Technical College.
+- **On-campus housing is synthetic.** 30% of students, a 60% chance of staying each term, generated with a fixed seed.
 
 ## Rebuild and test
 
 Run from this folder:
 
 ```bash
+python3 -m src.generator.enrichment.on_campus_housing   # data/input/enrichment/on_campus_housing.csv
 ./scripts/test_config.sh                                 # configs, schema, rule format and ER diagram
 ./scripts/test_rules.sh                                  # the rules module
+./scripts/test_generator.sh                              # on-campus housing generator
 ```
 
 Requires Python 3 and the packages in `requirements.txt` (`pip install -r requirements.txt`).

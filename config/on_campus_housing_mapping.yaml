@@ -1,0 +1,45 @@
+# How the on-campus housing enrichment file writes its values, and where each column goes (Milestone 2.1 spec, D2).
+# Run on every load. What a valid stored value looks like (types, allowed values, ranges) is NOT
+# here: it's in config/destination_schema.yaml, the same for every file that writes the column.
+#
+# Each entry: source (or value, a fixed value for every row), destination_table,
+# destination_column and on_conflict (append, replace or keep: what the loader does when the
+# destination row already holds a value). Where they apply:
+#   format          how a date is written, as a strptime pattern.
+#   true_values / false_values   how a true/false value is written.
+#   value_map       known variants and their repaired values (D7).
+#   missing_values  codes this file uses for "no value" (D5). A blank cell always means no value.
+#   unknown_values  codes this file uses for "unknown" (D6).
+#   must_exist      the row must already have been written by another file in the same run.
+# A source column with no destination is marked `dropped:` with the reason.
+# Written by src/generator/enrichment/on_campus_housing.py.
+
+- value: uses_on_campus_housing
+  destination_table: student_attribute
+  destination_column: attribute_key
+  on_conflict: replace
+
+- source: Student_GUID
+  destination_table: student_attribute
+  destination_column: student_id
+  on_conflict: replace
+
+- source: Academic_Year
+  destination_table: term
+  destination_column: academic_year
+  on_conflict: replace
+
+- source: Academic_Term
+  destination_table: term
+  destination_column: academic_term
+  on_conflict: replace
+
+- source: Uses_On_Campus_Housing
+  destination_table: student_attribute
+  destination_column: attribute_value
+  on_conflict: replace
+
+- source: Source
+  destination_table: student_attribute
+  destination_column: source
+  on_conflict: replace

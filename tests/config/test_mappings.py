@@ -20,6 +20,8 @@ MANIFEST = {
 MAPPINGS = {
     "cohort_mapping.yaml": "data/input/pdp_cohort_data.csv",
     "course_mapping.yaml": "data/input/pdp_course_data.csv",
+    "on_campus_housing_mapping.yaml": "data/input/enrichment/on_campus_housing.csv",
+    "institution_events_mapping.yaml": "data/input/enrichment/institution_events.csv",
 }
 
 
