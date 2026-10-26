@@ -1,0 +1,169 @@
+# Destination schema for the normalized data model (Milestone 1 spec, SC-2 and D8).
+# The only place column types are defined. One parent map per table; fields in column order. Each field has:
+#   type        Python type: str, int, float, bool, date, datetime.
+#   nullable    whether the stored value can be blank.
+#   primary_key / foreign_key / unique   keys; fields sharing a unique group name are unique together.
+
+institution:
+  institution_id: {type: int, nullable: false, primary_key: true}
+  name: {type: str, nullable: false}
+  is_placeholder: {type: bool, nullable: false}
+
+data_provider:
+  provider_id: {type: int, nullable: false, primary_key: true}
+  name: {type: str, nullable: false}
+  source_file: {type: str, nullable: false}
+  file_sha256: {type: str, nullable: false, unique: loaded_file}   # re-loading the same file finds the same row
+  row_count: {type: int, nullable: false}
+  loaded_at: {type: datetime, nullable: false}
+
+student:
+  student_id: {type: str, nullable: false, primary_key: true}
+  institution_id: {type: int, nullable: false, foreign_key: institution.institution_id}
+  student_age: {type: str, nullable: true}
+  race: {type: str, nullable: true}
+  ethnicity: {type: str, nullable: true}
+  gender: {type: str, nullable: true}
+  first_gen: {type: str, nullable: true}
+
+cohort_membership:
+  student_id: {type: str, nullable: false, primary_key: true, foreign_key: student.student_id}
+  cohort: {type: str, nullable: false, primary_key: true}
+  provider_id: {type: int, nullable: false, foreign_key: data_provider.provider_id}
+  cohort_term: {type: str, nullable: false}
+  enrollment_type: {type: str, nullable: true}
+  enrollment_intensity_first_term: {type: str, nullable: true}
+  math_placement: {type: str, nullable: true}
+  english_placement: {type: str, nullable: true}
+  dual_and_summer_enrollment: {type: str, nullable: true}
+  pell_status_first_year: {type: str, nullable: true}
+  attendance_status_term_1: {type: str, nullable: true}
+  credential_type_sought_year_1: {type: str, nullable: true}
+  program_of_study_term_1: {type: str, nullable: true}
+  gpa_group_term_1: {type: float, nullable: true}
+  gpa_group_year_1: {type: float, nullable: true}
+  number_of_credits_attempted_yr_1: {type: float, nullable: true}
+  number_of_credits_earned_yr_1: {type: float, nullable: true}
+  number_of_credits_attempted_yr_2: {type: float, nullable: true}
+  number_of_credits_earned_yr_2: {type: float, nullable: true}
+  number_of_credits_attempted_yr_3: {type: float, nullable: true}
+  number_of_credits_earned_yr_3: {type: float, nullable: true}
+  number_of_credits_attempted_yr_4: {type: float, nullable: true}
+  number_of_credits_earned_yr_4: {type: float, nullable: true}
+  gateway_math_status: {type: str, nullable: true}
+  gateway_english_status: {type: str, nullable: true}
+  attempted_gateway_math_year1: {type: str, nullable: true}
+  attempted_gateway_english_year1: {type: str, nullable: true}
+  completed_gateway_math_year1: {type: str, nullable: true}
+  completed_gateway_english_year1: {type: str, nullable: true}
+  gateway_math_grade_y1: {type: str, nullable: true}
+  gateway_english_grade_y1: {type: str, nullable: true}
+  attempted_dev_math_y1: {type: str, nullable: true}
+  attempted_dev_english_y1: {type: str, nullable: true}
+  completed_dev_math_y1: {type: str, nullable: true}
+  completed_dev_english_y1: {type: str, nullable: true}
+  retention: {type: bool, nullable: true}
+  persistence: {type: bool, nullable: true}
+  years_to_ba_at_cohort_inst: {type: int, nullable: true}
+  years_to_a_or_c_at_cohort_inst: {type: int, nullable: true}
+  years_to_ba_at_other_inst: {type: int, nullable: true}
+  years_to_a_or_c_at_other_inst: {type: int, nullable: true}
+  years_of_last_enrollment_at_coho: {type: int, nullable: true}
+  years_of_last_enrollment_at_othe: {type: int, nullable: true}
+  time_to_credential: {type: float, nullable: true}
+  reading_placement: {type: str, nullable: true}
+  special_program: {type: str, nullable: true}
+  naspa_first_generation: {type: str, nullable: true}
+  incarcerated_status: {type: str, nullable: true}
+  military_status: {type: str, nullable: true}
+  employment_status: {type: str, nullable: true}
+  disability_status: {type: str, nullable: true}
+  foreign_language_completion: {type: str, nullable: true}
+  first_year_to_bachelors_at_coh: {type: int, nullable: true}
+  first_year_to_a_or_c_at_cohort: {type: int, nullable: true}
+  first_year_to_bachelor_at_other: {type: int, nullable: true}
+  first_year_to_a_or_c_at_other: {type: int, nullable: true}
+  program_of_study_year_1: {type: str, nullable: true}
+  s_most_recent_bachelors_at_o_i: {type: str, nullable: true}
+  s_most_recent_associates_or_c: {type: str, nullable: true}
+  s_most_recent_last_enroll_at_o: {type: str, nullable: true}
+  s_first_bachelors_at_other_ins: {type: str, nullable: true}
+  s_first_associates_or_cert: {type: str, nullable: true}
+  c_most_recent_bachelors_at_o_i: {type: str, nullable: true}
+  c_most_recent_associates_or_c: {type: str, nullable: true}
+  c_most_recent_last_enroll_at_o: {type: str, nullable: true}
+  c_first_bachelors_at_other_ins: {type: str, nullable: true}
+  c_first_associates_or_cert: {type: str, nullable: true}
+  l_most_recent_bachelors_at_o_i: {type: str, nullable: true}
+  l_most_recent_associates_or_c: {type: str, nullable: true}
+  l_most_recent_last_enroll_at_o: {type: str, nullable: true}
+  l_first_bachelors_at_other_ins: {type: str, nullable: true}
+  l_first_associates_or_cert: {type: str, nullable: true}
+  years_to_latest_associates_at_co: {type: int, nullable: true}
+  years_to_latest_certificate_at_c: {type: int, nullable: true}
+  years_to_latest_associates_at_ot: {type: int, nullable: true}
+  years_to_latest_certificate_at_o: {type: int, nullable: true}
+  first_year_to_associates_at_coho: {type: int, nullable: true}
+  first_year_to_certificate_at_coh: {type: int, nullable: true}
+  first_year_to_associates_at_othe: {type: int, nullable: true}
+  first_year_to_certificate_at_oth: {type: int, nullable: true}
+
+term:
+  term_id: {type: int, nullable: false, primary_key: true}
+  academic_year: {type: str, nullable: false, unique: term_key}
+  academic_term: {type: str, nullable: false, unique: term_key}
+  sort_order: {type: int, nullable: false}
+
+course:
+  course_id: {type: int, nullable: false, primary_key: true}
+  course_prefix: {type: str, nullable: false, unique: course_code}
+  course_number: {type: str, nullable: false, unique: course_code}
+
+course_enrollment:
+  enrollment_id: {type: int, nullable: false, primary_key: true}
+  provider_id: {type: int, nullable: false, foreign_key: data_provider.provider_id, unique: source_row}
+  source_row_number: {type: int, nullable: false, unique: source_row}
+  student_id: {type: str, nullable: false, foreign_key: student.student_id}
+  course_id: {type: int, nullable: true, foreign_key: course.course_id}
+  term_id: {type: int, nullable: false, foreign_key: term.term_id}
+  attempt_number: {type: int, nullable: true}   # blank on rows with no course record
+  section_id: {type: str, nullable: true}
+  course_name: {type: str, nullable: true}
+  course_cip: {type: str, nullable: true}
+  course_type: {type: str, nullable: true}
+  math_or_english_gateway: {type: str, nullable: true}
+  co_requisite_course: {type: str, nullable: true}
+  course_begin_date: {type: date, nullable: true}
+  course_end_date: {type: date, nullable: true}
+  grade: {type: str, nullable: true}
+  number_of_credits_attempted: {type: float, nullable: true}
+  number_of_credits_earned: {type: float, nullable: true}
+  delivery_method: {type: str, nullable: true}
+  core_course: {type: str, nullable: true}
+  core_course_type: {type: str, nullable: true}
+  core_competency_completed: {type: str, nullable: true}
+  enrolled_at_other_institution_s: {type: str, nullable: true}
+  credential_engine_identifier: {type: str, nullable: true}
+  course_instructor_employment_sta: {type: str, nullable: true}
+  course_instructor_rank: {type: str, nullable: true}
+  s_enrollment_record_at_other: {type: str, nullable: true}
+  c_enrollment_record_at_other: {type: str, nullable: true}
+  l_enrollment_record_at_other: {type: str, nullable: true}
+  term_program_of_study: {type: str, nullable: true}
+
+student_attribute:
+  attribute_id: {type: int, nullable: false, primary_key: true}
+  student_id: {type: str, nullable: false, foreign_key: student.student_id, unique: attribute_fact}
+  term_id: {type: int, nullable: true, foreign_key: term.term_id, unique: attribute_fact}
+  attribute_key: {type: str, nullable: false, unique: attribute_fact}
+  attribute_value: {type: str, nullable: false, unique: attribute_fact}
+  source: {type: str, nullable: false, unique: attribute_fact}
+
+institution_event:
+  event_id: {type: int, nullable: false, primary_key: true}
+  institution_id: {type: int, nullable: false, foreign_key: institution.institution_id, unique: event_fact}
+  event_type: {type: str, nullable: false, unique: event_fact}
+  name: {type: str, nullable: false, unique: event_fact}
+  start_date: {type: date, nullable: false, unique: event_fact}
+  end_date: {type: date, nullable: false}
+  source: {type: str, nullable: true}
