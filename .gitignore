@@ -218,3 +218,7 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Validation runs (Milestone 2.1): local audit records, not committed
+logs/*
+!logs/.gitkeep

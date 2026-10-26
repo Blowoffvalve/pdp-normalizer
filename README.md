@@ -7,6 +7,8 @@ This repository holds the contract for the normalized data model (GitHub issue #
 - how two example enrichment files feed in
 - what the tables look like for 10 real students
 
+The validator (Milestone 2.1) checks a run's files against all of it and keeps an audit trail.
+
 Build against it now. The rest of the pipeline, which loads full data, comes later in Milestone 2.
 
 **The sample rows are real rows from the mock data, but they have not been validated.** The schema and the configs are the stable part. Values in the samples can be wrong in the same ways the mock data is.
@@ -27,7 +29,9 @@ Build against it now. The rest of the pipeline, which loads full data, comes lat
 | `data/output/sample/` | One CSV per table, built from `data/input/sample/` through the configs. |
 | `src/sample/build_sample.py` | Rebuilds both sample folders. |
 | `src/generator/enrichment/on_campus_housing.py` | Generates the synthetic on-campus housing file. |
-| `src/rules/rules.py` | Reads and checks the configs, and applies them to one value. Used by the sample builder. |
+| `src/rules/rules.py` | Reads and checks the configs, and applies them to one value. Used by the validator and the sample builder. |
+| `src/validator/validate.py` | The validator: checks a run's files, writes its report and failed records to `logs/`. |
+| `logs/` | One folder per validation run in `validation_report/` and `failed_records/`, named by run id. Not committed. |
 
 ## The tables
 
@@ -111,7 +115,7 @@ Options:
 
 Whether a column can be blank, its type and its keys are never rules: they're already in the schema.
 
-Every rule is `error` for now. The validator layer sets the ones the mock data breaks to `warning`, so squads still get data while the questions to Dena (/dev/color) are open. Every Milestone 1 English rule and what replaced it is in the team's planning notes (the Milestone 2.1 rule translation).
+The rules the mock data breaks are `warning`, with a comment giving the number of rows, so squads get data while the questions to Dena (/dev/color) are open. Every Milestone 1 English rule and what replaced it is in the team's planning notes (the Milestone 2.1 rule translation).
 
 **Keys and links between tables.** A source row can fill several tables at once. A course-file row finds its `term` and `course`, then writes a `course_enrollment` row that points at them. Rows are found by their natural key:
 - `student`: `student_id`
@@ -126,11 +130,29 @@ Every rule is `error` for now. The validator layer sets the ones the mock data b
 - **17,755 course-file rows have no course record.** On those rows the student was enrolled at another institution that term, or the term is unknown. They're kept, with a blank `course_id`, `section_id` and `attempt_number`.
 - **456 course rows have no year or term.** They point at the one `UNKNOWN` term, which sorts last.
 - **`attempt_number` counts retakes.** It's the order of a student's rows for the same course, by term.
-- **`UNKNOWN` means the file said it doesn't know; blank means it said nothing.** In text columns, the codes the dictionaries define as unknown or missing (`UK`, `Unknown`, `-1` where it means unknown, `M = Missing`, `MISSING`) are stored as `UNKNOWN`. Codes the dictionaries don't define, such as Pell's `U`, stay as written and fail their rule. In number, date and true/false columns both are blank.
+- **`UNKNOWN` means the file said it doesn't know; blank means it said nothing.** In text columns, the codes the dictionaries define as unknown or missing (`UK`, `Unknown`, `-1` where it means unknown, `M = Missing`, `MISSING`) are stored as `UNKNOWN`. Codes the dictionaries don't define, such as Pell's `U`, stay as written and fail a `warning` rule. In number, date and true/false columns both are blank; the validator's summary counts them apart.
 - **Two `Race` labels are repaired.** The mock files cut them at 25 characters; they're stored in full (2,023 rows across both files).
 - **The course file's `Cohort_Term` often disagrees with the cohort file.** The cohort file's value is kept. Why it disagrees is an open question for Dena (/dev/color).
 - **The mock data has no institution column.** Everything belongs to one placeholder institution, and the two example events come from two real colleges: Leech Lake Tribal College and United Tribes Technical College.
 - **On-campus housing is synthetic.** 30% of students, a 60% chance of staying each term, generated with a fixed seed.
+
+## Validate a run
+
+```bash
+python3 -m src.validator.validate \
+    --cohort data/input/pdp_cohort_data.csv --course data/input/pdp_course_data.csv \
+    --cohort_config config/cohort_mapping.yaml --course_config config/course_mapping.yaml
+python3 -m src.validator.validate \
+    --enrichment data/input/enrichment/on_campus_housing.csv \
+    --enrichment_config config/on_campus_housing_mapping.yaml
+```
+
+Each run prints its run id, such as `20261026T065015Z-e3f183` (the start time in UTC plus 6 random characters), and writes:
+- `logs/validation_report/<run id>/summary.yaml`: the input and config files with their SHA-256 checksums, rows read, passed and failed, failures per rule, and repairs, unknowns and no-values per column.
+- `logs/validation_report/<run id>/failures.csv`: one line per failure, with its `failure_id`, file, row, column, value, rule and severity. For an `error`, `failed_record` names the file in `failed_records/` that holds the row.
+- `logs/failed_records/<run id>/<source file>.csv`: each held-back row, unchanged, after `run_id`, `source_row_number` and `failure_ids` (which point back at `failures.csv`).
+
+In the enrichment mode foreign keys aren't checked, because there's no database yet; the summary says so. The command exits 0 when the run finishes and 2 when a config is invalid. `--config_dir`, `--logs_dir` and `--run_id` change the defaults.
 
 ## Rebuild and test
 
@@ -141,6 +163,7 @@ python3 -m src.generator.enrichment.on_campus_housing   # data/input/enrichment/
 python3 -m src.sample.build_sample                       # data/input/sample/ and data/output/sample/
 ./scripts/test_config.sh                                 # configs, schema, rule format and ER diagram
 ./scripts/test_rules.sh                                  # the rules module
+./scripts/test_validator.sh                              # the validator, including the full mock data
 ./scripts/test_sample.sh                                 # sample builder and samples
 ./scripts/test_generator.sh                              # on-campus housing generator
 ```
