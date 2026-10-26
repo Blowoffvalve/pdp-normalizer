@@ -1,0 +1,39 @@
+# Mapping config for the on-campus housing enrichment file (Milestone 1 spec, D11).
+# Written by src/generator/enrichment/on_campus_housing.py. Types come from config/destination_schema.yaml.
+# An entry with `value:` instead of `source:` writes the same fixed value on every row (spec P4).
+
+- value: uses_on_campus_housing
+  destination_table: student_attribute
+  destination_column: attribute_key
+  validation_rule: Fixed value
+  on_conflict: replace
+
+- source: Student_GUID
+  destination_table: student_attribute
+  destination_column: student_id
+  validation_rule: Required; must exist in student.student_id
+  on_conflict: replace
+
+- source: Academic_Year
+  destination_table: term
+  destination_column: academic_year
+  validation_rule: Required; pattern YYYY-YY
+  on_conflict: replace
+
+- source: Academic_Term
+  destination_table: term
+  destination_column: academic_term
+  validation_rule: Required; AllowedValues [Fall, Winter, Spring, Summer]
+  on_conflict: replace
+
+- source: Uses_On_Campus_Housing
+  destination_table: student_attribute
+  destination_column: attribute_value
+  validation_rule: Required; AllowedValues [true, false]
+  on_conflict: replace
+
+- source: Source
+  destination_table: student_attribute
+  destination_column: source
+  validation_rule: Required
+  on_conflict: replace

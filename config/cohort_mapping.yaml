@@ -1,0 +1,518 @@
+# Mapping config for the cohort Analysis-Ready File (Milestone 1 spec, SC-1). Run on every load.
+# Types are not here: they come from config/destination_schema.yaml (spec D8).
+# Allowed values come from data/dictionaries/arf_cohort_data_dictionary.md in the starter repo and are
+# compared ignoring case and spaces. on_conflict is what the loader does when the destination row
+# already holds a value: append, replace or keep (spec D6, D7).
+
+- source: Cohort
+  destination_table: cohort_membership
+  destination_column: cohort
+  validation_rule: "Required; pattern YYYY-YY, two consecutive years"
+  on_conflict: replace
+
+- source: Student_GUID
+  destination_table: student
+  destination_column: student_id
+  validation_rule: "Required; 32 hexadecimal characters"
+  on_conflict: replace
+
+- source: Student_GUID
+  destination_table: cohort_membership
+  destination_column: student_id
+  validation_rule: "Required; 32 hexadecimal characters"
+  on_conflict: replace
+
+- source: Cohort_Term
+  destination_table: cohort_membership
+  destination_column: cohort_term
+  validation_rule: "Required; AllowedValues [Fall, Winter, Spring, Summer]"
+  on_conflict: replace
+
+- source: Student_Age
+  destination_table: student
+  destination_column: student_age
+  validation_rule: "AllowedValues [20 and younger, > 20-24, Older than 24]"
+  on_conflict: replace   # latest cohort row wins for the 2 students with two cohort rows (D6)
+
+- source: Enrollment_Type
+  destination_table: cohort_membership
+  destination_column: enrollment_type
+  validation_rule: "AllowedValues [First-time, Re-admit, Transfer-in]"
+  on_conflict: replace
+
+- source: Enrollment_Intensity_First_Term
+  destination_table: cohort_membership
+  destination_column: enrollment_intensity_first_term
+  validation_rule: "AllowedValues [Full-time, Part-time]"
+  on_conflict: replace
+
+- source: Math_Placement
+  destination_table: cohort_membership
+  destination_column: math_placement
+  validation_rule: "AllowedValues [C, N, UK]"
+  on_conflict: replace
+
+- source: English_Placement
+  destination_table: cohort_membership
+  destination_column: english_placement
+  validation_rule: "AllowedValues [C, N, UK]"
+  on_conflict: replace
+
+- source: Dual_and_Summer_Enrollment
+  destination_table: cohort_membership
+  destination_column: dual_and_summer_enrollment
+  validation_rule: "AllowedValues [DE, SE, DS]"
+  on_conflict: replace
+
+- source: Race
+  destination_table: student
+  destination_column: race
+  validation_rule: "AllowedValues [White, Hispanic, American Indian or Alaska Native, Native Hawaiian or Other Pacific Islander, Two or More Races, Black or African American, Nonresident alien, Asian, Unknown]"
+  on_conflict: replace   # latest cohort row wins for the 2 students with two cohort rows (D6)
+
+- source: Ethnicity
+  destination_table: student
+  destination_column: ethnicity
+  validation_rule: "AllowedValues [UK, H, N]"
+  on_conflict: replace   # latest cohort row wins for the 2 students with two cohort rows (D6)
+
+- source: Gender
+  destination_table: student
+  destination_column: gender
+  validation_rule: "AllowedValues [M, F, P, X, UK]"
+  on_conflict: replace   # latest cohort row wins for the 2 students with two cohort rows (D6)
+
+- source: First_Gen
+  destination_table: student
+  destination_column: first_gen
+  validation_rule: "AllowedValues [N, P, C, A, B, E]; blank allowed"
+  on_conflict: replace   # latest cohort row wins for the 2 students with two cohort rows (D6)
+
+- source: Pell_Status_First_Year
+  destination_table: cohort_membership
+  destination_column: pell_status_first_year
+  validation_rule: "AllowedValues [Y, N]"
+  on_conflict: replace
+
+- source: Attendance_Status_Term_1
+  destination_table: cohort_membership
+  destination_column: attendance_status_term_1
+  validation_rule: "AllowedValues [First-Time Full-Time, First-Time Part-Time, Transfer-In Full-Time, Transfer-In Part-Time]"
+  on_conflict: replace
+
+- source: Credential_Type_Sought_Year_1
+  destination_table: cohort_membership
+  destination_column: credential_type_sought_year_1
+  validation_rule: "AllowedValues [C1, C2, C4, 01, A, 02, B, 03, PB, 04, M, 05, D, 06, FP, 07, PC, 08, NC, 99, -1]"
+  on_conflict: replace
+
+- source: Program_of_Study_Term_1
+  destination_table: cohort_membership
+  destination_column: program_of_study_term_1
+  validation_rule: "CIP code (6 digits, leading zeros kept); blank allowed"
+  on_conflict: replace
+
+- source: GPA_Group_Term_1
+  destination_table: cohort_membership
+  destination_column: gpa_group_term_1
+  validation_rule: "Number 0-4; 'UK' means blank"
+  on_conflict: replace
+
+- source: GPA_Group_Year_1
+  destination_table: cohort_membership
+  destination_column: gpa_group_year_1
+  validation_rule: "Number 0-4; 'UK' means blank"
+  on_conflict: replace
+
+- source: Number_of_Credits_Attempted_Yr_1
+  destination_table: cohort_membership
+  destination_column: number_of_credits_attempted_yr_1
+  validation_rule: "Number >= 1; '.' means blank"
+  on_conflict: replace
+
+- source: Number_of_Credits_Earned_Yr_1
+  destination_table: cohort_membership
+  destination_column: number_of_credits_earned_yr_1
+  validation_rule: "Number >= 0; '.' means blank"
+  on_conflict: replace
+
+- source: Number_of_Credits_Attempted_Yr_2
+  destination_table: cohort_membership
+  destination_column: number_of_credits_attempted_yr_2
+  validation_rule: "Number >= 0; '.' means blank"
+  on_conflict: replace
+
+- source: Number_of_Credits_Earned_Yr_2
+  destination_table: cohort_membership
+  destination_column: number_of_credits_earned_yr_2
+  validation_rule: "Number >= 0; '.' means blank"
+  on_conflict: replace
+
+- source: Number_of_Credits_Attempted_Yr_3
+  destination_table: cohort_membership
+  destination_column: number_of_credits_attempted_yr_3
+  validation_rule: "Number >= 0; '.' means blank"
+  on_conflict: replace
+
+- source: Number_of_Credits_Earned_Yr_3
+  destination_table: cohort_membership
+  destination_column: number_of_credits_earned_yr_3
+  validation_rule: "Number >= 0; '.' means blank"
+  on_conflict: replace
+
+- source: Number_of_Credits_Attempted_Yr_4
+  destination_table: cohort_membership
+  destination_column: number_of_credits_attempted_yr_4
+  validation_rule: "Number >= 0; '.' means blank"
+  on_conflict: replace
+
+- source: Number_of_Credits_Earned_Yr_4
+  destination_table: cohort_membership
+  destination_column: number_of_credits_earned_yr_4
+  validation_rule: "Number >= 0; '.' means blank"
+  on_conflict: replace
+
+- source: Gateway_Math_Status
+  destination_table: cohort_membership
+  destination_column: gateway_math_status
+  validation_rule: "AllowedValues [R, N, UK]"
+  on_conflict: replace
+
+- source: Gateway_English_Status
+  destination_table: cohort_membership
+  destination_column: gateway_english_status
+  validation_rule: "AllowedValues [R, N, UK]"
+  on_conflict: replace
+
+- source: AttemptedGatewayMathYear1
+  destination_table: cohort_membership
+  destination_column: attempted_gateway_math_year1
+  validation_rule: "AllowedValues [Y, N, UK]; blank allowed"
+  on_conflict: replace
+
+- source: AttemptedGatewayEnglishYear1
+  destination_table: cohort_membership
+  destination_column: attempted_gateway_english_year1
+  validation_rule: "AllowedValues [Y, N, UK]; blank allowed"
+  on_conflict: replace
+
+- source: CompletedGatewayMathYear1
+  destination_table: cohort_membership
+  destination_column: completed_gateway_math_year1
+  validation_rule: "AllowedValues [C, D, NA]; blank allowed"
+  on_conflict: replace
+
+- source: CompletedGatewayEnglishYear1
+  destination_table: cohort_membership
+  destination_column: completed_gateway_english_year1
+  validation_rule: "AllowedValues [C, D, NA]; blank allowed"
+  on_conflict: replace
+
+- source: GatewayMathGradeY1
+  destination_table: cohort_membership
+  destination_column: gateway_math_grade_y1
+  validation_rule: "Number 0-4, or AllowedValues [P, F, I, W, A, M, O]; blank allowed"
+  on_conflict: replace
+
+- source: GatewayEnglishGradeY1
+  destination_table: cohort_membership
+  destination_column: gateway_english_grade_y1
+  validation_rule: "Number 0-4, or AllowedValues [P, F, I, W, A, M, O]; blank allowed"
+  on_conflict: replace
+
+- source: AttemptedDevMathY1
+  destination_table: cohort_membership
+  destination_column: attempted_dev_math_y1
+  validation_rule: "AllowedValues [Y, N, NA, UK]; blank allowed"
+  on_conflict: replace
+
+- source: AttemptedDevEnglishY1
+  destination_table: cohort_membership
+  destination_column: attempted_dev_english_y1
+  validation_rule: "AllowedValues [Y, N, NA, UK]; blank allowed"
+  on_conflict: replace
+
+- source: CompletedDevMathY1
+  destination_table: cohort_membership
+  destination_column: completed_dev_math_y1
+  validation_rule: "AllowedValues [C, D, NA]; blank allowed"
+  on_conflict: replace
+
+- source: CompletedDevEnglishY1
+  destination_table: cohort_membership
+  destination_column: completed_dev_english_y1
+  validation_rule: "AllowedValues [C, D, NA]; blank allowed"
+  on_conflict: replace
+
+- source: Retention
+  destination_table: cohort_membership
+  destination_column: retention
+  validation_rule: "AllowedValues [1, 0]; 1 = true"
+  on_conflict: replace
+
+- source: Persistence
+  destination_table: cohort_membership
+  destination_column: persistence
+  validation_rule: "AllowedValues [1, 0]; 1 = true"
+  on_conflict: replace
+
+- source: Years_to_BA_at_cohort_inst
+  destination_table: cohort_membership
+  destination_column: years_to_ba_at_cohort_inst
+  validation_rule: "AllowedValues [0, 1, 2, 3, 4, 5, 6, 7]"
+  on_conflict: replace
+
+- source: Years_to_A_or_C_at_cohort_inst
+  destination_table: cohort_membership
+  destination_column: years_to_a_or_c_at_cohort_inst
+  validation_rule: "AllowedValues [0, 1, 2, 3, 4, 5, 6, 7]"
+  on_conflict: replace
+
+- source: Years_to_BA_at_other_inst
+  destination_table: cohort_membership
+  destination_column: years_to_ba_at_other_inst
+  validation_rule: "AllowedValues [0, 1, 2, 3, 4, 5, 6, 7]"
+  on_conflict: replace
+
+- source: Years_to_A_or_C_at_other_inst
+  destination_table: cohort_membership
+  destination_column: years_to_a_or_c_at_other_inst
+  validation_rule: "AllowedValues [0, 1, 2, 3, 4, 5, 6, 7]"
+  on_conflict: replace
+
+- source: Years_of_Last_Enrollment_at_coho
+  destination_table: cohort_membership
+  destination_column: years_of_last_enrollment_at_coho
+  validation_rule: "AllowedValues [0, 1, 2, 3, 4, 5, 6, 7]"
+  on_conflict: replace
+
+- source: Years_of_Last_Enrollment_at_othe
+  destination_table: cohort_membership
+  destination_column: years_of_last_enrollment_at_othe
+  validation_rule: "AllowedValues [0, 1, 2, 3, 4, 5, 6, 7]"
+  on_conflict: replace
+
+- source: Time_to_Credential
+  destination_table: cohort_membership
+  destination_column: time_to_credential
+  validation_rule: "Number >= 0, one decimal place; '.' means blank"
+  on_conflict: replace
+
+- source: Reading_Placement
+  destination_table: cohort_membership
+  destination_column: reading_placement
+  validation_rule: "AllowedValues [C, N, UK]; blank allowed"
+  on_conflict: replace
+
+- source: SpecialProgram
+  destination_table: cohort_membership
+  destination_column: special_program
+  validation_rule: "Free text; blank allowed"
+  on_conflict: replace
+
+- source: NASPAFirstGeneration
+  destination_table: cohort_membership
+  destination_column: naspa_first_generation
+  validation_rule: "AllowedValues [-1, 0, 1, 2, 3, 4, 5, 6]"
+  on_conflict: replace
+
+- source: IncarceratedStatus
+  destination_table: cohort_membership
+  destination_column: incarcerated_status
+  validation_rule: "AllowedValues [Y, P, N, UK]; blank allowed"
+  on_conflict: replace
+
+- source: MilitaryStatus
+  destination_table: cohort_membership
+  destination_column: military_status
+  validation_rule: "AllowedValues [-1, 0, 1, 2]; blank allowed"
+  on_conflict: replace
+
+- source: EmploymentStatus
+  destination_table: cohort_membership
+  destination_column: employment_status
+  validation_rule: "AllowedValues [-1, 0, 1, 2, 3, 4]"
+  on_conflict: replace
+
+- source: DisabilityStatus
+  destination_table: cohort_membership
+  destination_column: disability_status
+  validation_rule: "AllowedValues [Y, N, UK]; blank allowed"
+  on_conflict: replace
+
+- source: ForeignLanguageCompletion
+  destination_table: cohort_membership
+  destination_column: foreign_language_completion
+  validation_rule: "Term and year (for example FALL 2023), or N; blank allowed"
+  on_conflict: replace
+
+- source: First_Year_to_Bachelors_at_coh
+  destination_table: cohort_membership
+  destination_column: first_year_to_bachelors_at_coh
+  validation_rule: "AllowedValues [0, 1, 2, 3, 4, 5, 6, 7]"
+  on_conflict: replace
+
+- source: First_Year_to_A_or_C_at_cohort
+  destination_table: cohort_membership
+  destination_column: first_year_to_a_or_c_at_cohort
+  validation_rule: "AllowedValues [0, 1, 2, 3, 4, 5, 6, 7]"
+  on_conflict: replace
+
+- source: First_Year_to_Bachelor_at_other
+  destination_table: cohort_membership
+  destination_column: first_year_to_bachelor_at_other
+  validation_rule: "AllowedValues [0, 1, 2, 3, 4, 5, 6, 7]"
+  on_conflict: replace
+
+- source: First_Year_to_A_or_C_at_other
+  destination_table: cohort_membership
+  destination_column: first_year_to_a_or_c_at_other
+  validation_rule: "AllowedValues [0, 1, 2, 3, 4, 5, 6, 7]"
+  on_conflict: replace
+
+- source: Program_of_Study_Year_1
+  destination_table: cohort_membership
+  destination_column: program_of_study_year_1
+  validation_rule: "CIP code (6 digits, leading zeros kept); blank allowed"
+  on_conflict: replace
+
+- source: S_Most_Recent_Bachelors_at_O_I
+  destination_table: cohort_membership
+  destination_column: s_most_recent_bachelors_at_o_i
+  validation_rule: "US state code; blank allowed"
+  on_conflict: replace
+
+- source: S_Most_Recent_Associates_or_C
+  destination_table: cohort_membership
+  destination_column: s_most_recent_associates_or_c
+  validation_rule: "US state code; blank allowed"
+  on_conflict: replace
+
+- source: S_Most_Recent_Last_Enroll_at_O
+  destination_table: cohort_membership
+  destination_column: s_most_recent_last_enroll_at_o
+  validation_rule: "US state code; blank allowed"
+  on_conflict: replace
+
+- source: S_First_Bachelors_at_Other_Ins
+  destination_table: cohort_membership
+  destination_column: s_first_bachelors_at_other_ins
+  validation_rule: "US state code; blank allowed"
+  on_conflict: replace
+
+- source: S_First_Associates_or_Cert
+  destination_table: cohort_membership
+  destination_column: s_first_associates_or_cert
+  validation_rule: "US state code; blank allowed"
+  on_conflict: replace
+
+- source: C_Most_Recent_Bachelors_at_O_I
+  destination_table: cohort_membership
+  destination_column: c_most_recent_bachelors_at_o_i
+  validation_rule: "Carnegie classification; blank allowed"
+  on_conflict: replace
+
+- source: C_Most_Recent_Associates_or_C
+  destination_table: cohort_membership
+  destination_column: c_most_recent_associates_or_c
+  validation_rule: "Carnegie classification; blank allowed"
+  on_conflict: replace
+
+- source: C_Most_Recent_Last_Enroll_at_O
+  destination_table: cohort_membership
+  destination_column: c_most_recent_last_enroll_at_o
+  validation_rule: "Carnegie classification; blank allowed"
+  on_conflict: replace
+
+- source: C_First_Bachelors_at_Other_Ins
+  destination_table: cohort_membership
+  destination_column: c_first_bachelors_at_other_ins
+  validation_rule: "Carnegie classification; blank allowed"
+  on_conflict: replace
+
+- source: C_First_Associates_or_Cert
+  destination_table: cohort_membership
+  destination_column: c_first_associates_or_cert
+  validation_rule: "Carnegie classification; blank allowed"
+  on_conflict: replace
+
+- source: L_Most_Recent_Bachelors_at_O_I
+  destination_table: cohort_membership
+  destination_column: l_most_recent_bachelors_at_o_i
+  validation_rule: "AllowedValues [Urban, Suburb, Town/Rural]; blank allowed"
+  on_conflict: replace
+
+- source: L_Most_Recent_Associates_or_C
+  destination_table: cohort_membership
+  destination_column: l_most_recent_associates_or_c
+  validation_rule: "AllowedValues [Urban, Suburb, Town/Rural]; blank allowed"
+  on_conflict: replace
+
+- source: L_Most_Recent_Last_Enroll_at_O
+  destination_table: cohort_membership
+  destination_column: l_most_recent_last_enroll_at_o
+  validation_rule: "AllowedValues [Urban, Suburb, Town/Rural]; blank allowed"
+  on_conflict: replace
+
+- source: L_First_Bachelors_at_Other_Ins
+  destination_table: cohort_membership
+  destination_column: l_first_bachelors_at_other_ins
+  validation_rule: "AllowedValues [Urban, Suburb, Town/Rural]; blank allowed"
+  on_conflict: replace
+
+- source: L_First_Associates_or_Cert
+  destination_table: cohort_membership
+  destination_column: l_first_associates_or_cert
+  validation_rule: "AllowedValues [Urban, Suburb, Town/Rural]; blank allowed"
+  on_conflict: replace
+
+- source: Years_to_Latest_Associates_at_Co
+  destination_table: cohort_membership
+  destination_column: years_to_latest_associates_at_co
+  validation_rule: "AllowedValues [0, 1, 2, 3, 4, 5, 6, 7]"
+  on_conflict: replace
+
+- source: Years_to_Latest_Certificate_at_C
+  destination_table: cohort_membership
+  destination_column: years_to_latest_certificate_at_c
+  validation_rule: "AllowedValues [0, 1, 2, 3, 4, 5, 6, 7]"
+  on_conflict: replace
+
+- source: Years_to_Latest_Associates_at_Ot
+  destination_table: cohort_membership
+  destination_column: years_to_latest_associates_at_ot
+  validation_rule: "AllowedValues [0, 1, 2, 3, 4, 5, 6, 7]"
+  on_conflict: replace
+
+- source: Years_to_Latest_Certificate_at_O
+  destination_table: cohort_membership
+  destination_column: years_to_latest_certificate_at_o
+  validation_rule: "AllowedValues [0, 1, 2, 3, 4, 5, 6, 7]"
+  on_conflict: replace
+
+- source: First_Year_to_Associates_at_Coho
+  destination_table: cohort_membership
+  destination_column: first_year_to_associates_at_coho
+  validation_rule: "AllowedValues [0, 1, 2, 3, 4, 5, 6, 7]"
+  on_conflict: replace
+
+- source: First_Year_to_Certificate_at_Coh
+  destination_table: cohort_membership
+  destination_column: first_year_to_certificate_at_coh
+  validation_rule: "AllowedValues [0, 1, 2, 3, 4, 5, 6, 7]"
+  on_conflict: replace
+
+- source: First_Year_to_Associates_at_Othe
+  destination_table: cohort_membership
+  destination_column: first_year_to_associates_at_othe
+  validation_rule: "AllowedValues [0, 1, 2, 3, 4, 5, 6, 7]"
+  on_conflict: replace
+
+- source: First_Year_to_Certificate_at_Oth
+  destination_table: cohort_membership
+  destination_column: first_year_to_certificate_at_oth
+  validation_rule: "AllowedValues [0, 1, 2, 3, 4, 5, 6, 7]"
+  on_conflict: replace
+
+- source: researchid
+  dropped: one constant value per file (cohort2026atd); no destination in the sanctioned schema

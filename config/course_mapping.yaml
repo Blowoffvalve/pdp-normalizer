@@ -1,0 +1,226 @@
+# Mapping config for the course Analysis-Ready File (Milestone 1 spec, SC-1). Run on every load.
+# Types are not here: they come from config/destination_schema.yaml (spec D8).
+# Allowed values come from data/dictionaries/arf_course_data_dictionary.md in the starter repo and are
+# compared ignoring case and spaces. on_conflict is what the loader does when the destination row
+# already holds a value: append, replace or keep (spec D6, D7).
+# 17,755 rows have no course record (the student was enrolled elsewhere that term, or the term is
+# unknown): course fields are blank on those rows, and course_enrollment.course_id is blank (spec P9).
+
+- source: Student_GUID
+  destination_table: course_enrollment
+  destination_column: student_id
+  validation_rule: Required; must exist in student.student_id
+  on_conflict: replace
+
+- source: Student_GUID
+  destination_table: student
+  destination_column: student_id
+  validation_rule: Required; must exist in student.student_id
+  on_conflict: keep         # finds the student row the cohort file wrote
+
+- source: Student_GUID
+  destination_table: cohort_membership
+  destination_column: student_id
+  validation_rule: Required; must exist in cohort_membership with the same Cohort
+  on_conflict: keep         # with Cohort, finds the cohort row the cohort file wrote
+
+- source: Student_Age
+  destination_table: student
+  destination_column: student_age
+  validation_rule: AllowedValues ["20 and younger", "> 20-24", "Older than 24"]
+  on_conflict: keep         # always equals the cohort file's value today
+
+- source: Race
+  destination_table: student
+  destination_column: race
+  validation_rule: AllowedValues [Nonresident Alien, American Indian or Alaska Native, Asian, Black or African American, Native Hawaiian or Other Pacific Islander, White, Hispanic, Two or more races, Unknown or missing]
+  on_conflict: keep
+
+- source: Ethnicity
+  destination_table: student
+  destination_column: ethnicity
+  validation_rule: AllowedValues [UK, H, N]
+  on_conflict: keep
+
+- source: Gender
+  destination_table: student
+  destination_column: gender
+  validation_rule: AllowedValues [M, F, P, X, UK]
+  on_conflict: keep
+
+- source: Cohort
+  destination_table: cohort_membership
+  destination_column: cohort
+  validation_rule: Required; pattern YYYY-YY, two consecutive years; must match the cohort file
+  on_conflict: keep
+
+- source: Cohort_Term
+  destination_table: cohort_membership
+  destination_column: cohort_term
+  validation_rule: AllowedValues [Fall, Winter, Spring, Summer]
+  on_conflict: append       # D1; Q-C, open question for Dena (/dev/color): the dictionary defines it as "term student first enrolled in at least one course"
+
+- source: Academic_Year
+  destination_table: term
+  destination_column: academic_year
+  validation_rule: Pattern YYYY-YY; blank goes to the unknown term
+  on_conflict: replace
+
+- source: Academic_Term
+  destination_table: term
+  destination_column: academic_term
+  validation_rule: AllowedValues [Fall, Winter, Spring, Summer]; blank goes to the unknown term
+  on_conflict: replace
+
+- source: Course_Prefix
+  destination_table: course
+  destination_column: course_prefix
+  validation_rule: Alphanumeric plus . - _ &; blank only on rows with no course record
+  on_conflict: replace
+
+- source: Course_Number
+  destination_table: course
+  destination_column: course_number
+  validation_rule: Alphanumeric plus . - _ &; blank only on rows with no course record
+  on_conflict: replace
+
+- source: Section_ID
+  destination_table: course_enrollment
+  destination_column: section_id
+  validation_rule: Alphanumeric plus . - _ &; blank only on rows with no course record
+  on_conflict: replace
+
+- source: Course_Name
+  destination_table: course_enrollment
+  destination_column: course_name
+  validation_rule: Text; blank only on rows with no course record
+  on_conflict: replace
+
+- source: Course_CIP
+  destination_table: course_enrollment
+  destination_column: course_cip
+  validation_rule: Pattern NN.NNNN, or MISSING; blank only on rows with no course record
+  on_conflict: replace
+
+- source: Course_Type
+  destination_table: course_enrollment
+  destination_column: course_type
+  validation_rule: AllowedValues [CU, CG, CC, CD, EL, AB, GE, NC, O]; blank only on rows with no course record
+  on_conflict: replace
+
+- source: Math_or_English_Gateway
+  destination_table: course_enrollment
+  destination_column: math_or_english_gateway
+  validation_rule: AllowedValues [M, E, N]; blank only on rows with no course record
+  on_conflict: replace
+
+- source: Co_requisite_Course
+  destination_table: course_enrollment
+  destination_column: co_requisite_course
+  validation_rule: AllowedValues [Y, N]; blank allowed
+  on_conflict: replace
+
+- source: Course_Begin_Date
+  destination_table: course_enrollment
+  destination_column: course_begin_date
+  validation_rule: Format YYYYMMDD; '.' means blank
+  on_conflict: replace
+
+- source: Course_End_Date
+  destination_table: course_enrollment
+  destination_column: course_end_date
+  validation_rule: Format YYYYMMDD; on or after course_begin_date; '.' means blank
+  on_conflict: replace
+
+- source: Grade
+  destination_table: course_enrollment
+  destination_column: grade
+  validation_rule: Number 0-4, or AllowedValues [P, F, I, W, A, M, O]
+  on_conflict: replace
+
+- source: Number_of_Credits_Attempted
+  destination_table: course_enrollment
+  destination_column: number_of_credits_attempted
+  validation_rule: Range 0-20; '.' means blank
+  on_conflict: replace
+
+- source: Number_of_Credits_Earned
+  destination_table: course_enrollment
+  destination_column: number_of_credits_earned
+  validation_rule: Range 0-20; not greater than number_of_credits_attempted; '.' means blank
+  on_conflict: replace
+
+- source: Delivery_Method
+  destination_table: course_enrollment
+  destination_column: delivery_method
+  validation_rule: AllowedValues [F, O, H]; blank allowed
+  on_conflict: replace
+
+- source: Core_Course
+  destination_table: course_enrollment
+  destination_column: core_course
+  validation_rule: AllowedValues [Y, N]; blank allowed
+  on_conflict: replace
+
+- source: Core_Course_Type
+  destination_table: course_enrollment
+  destination_column: core_course_type
+  validation_rule: Up to 20 characters; required when core_course = Y
+  on_conflict: replace
+
+- source: Core_Competency_Completed
+  destination_table: course_enrollment
+  destination_column: core_competency_completed
+  validation_rule: AllowedValues [Y, N]; blank allowed
+  on_conflict: replace
+
+- source: Enrolled_at_Other_Institution_s_
+  destination_table: course_enrollment
+  destination_column: enrolled_at_other_institution_s
+  validation_rule: AllowedValues [Y, N]
+  on_conflict: replace
+
+- source: Credential_Engine_Identifier
+  destination_table: course_enrollment
+  destination_column: credential_engine_identifier
+  validation_rule: Blank allowed
+  on_conflict: replace
+
+- source: Course_Instructor_Employment_Sta
+  destination_table: course_enrollment
+  destination_column: course_instructor_employment_sta
+  validation_rule: AllowedValues [PT, FT]; blank allowed
+  on_conflict: replace
+
+- source: Course_Instructor_Rank
+  destination_table: course_enrollment
+  destination_column: course_instructor_rank
+  validation_rule: AllowedValues [1, 2, 3, 4, 5, 6, 7]; blank allowed
+  on_conflict: replace
+
+- source: S_Enrollment_Record_at_other
+  destination_table: course_enrollment
+  destination_column: s_enrollment_record_at_other
+  validation_rule: State codes, pipe-delimited; blank allowed
+  on_conflict: replace
+
+- source: C_Enrollment_Record_at_other
+  destination_table: course_enrollment
+  destination_column: c_enrollment_record_at_other
+  validation_rule: Carnegie classifications, pipe-delimited; blank allowed
+  on_conflict: replace
+
+- source: L_Enrollment_Record_at_other
+  destination_table: course_enrollment
+  destination_column: l_enrollment_record_at_other
+  validation_rule: AllowedValues [Urban, Suburb, Town/Rural], pipe-delimited; blank allowed
+  on_conflict: replace
+
+- source: Term_Program_of_Study
+  destination_table: course_enrollment
+  destination_column: term_program_of_study
+  validation_rule: CIP code; blank allowed
+  on_conflict: replace
+
+- source: researchid
+  dropped: one constant value per file (course2026atd); no destination in the sanctioned schema

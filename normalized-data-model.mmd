@@ -1,0 +1,176 @@
+erDiagram
+  institution ||--o{ student : "enrolls"
+  institution ||--o{ institution_event : "hosts"
+  student ||--|{ cohort_membership : "enters in"
+  student ||--o{ course_enrollment : "takes"
+  course ||--|{ course_enrollment : "taken as"
+  term ||--o{ course_enrollment : "during"
+  data_provider ||--o{ cohort_membership : "supplied"
+  data_provider ||--o{ course_enrollment : "supplied"
+  student ||--o{ student_attribute : "described by"
+  term |o--o{ student_attribute : "optionally scoped to"
+
+  institution {
+    int institution_id PK
+    str name
+    bool is_placeholder "one placeholder for now"
+  }
+  data_provider {
+    int provider_id PK
+    str name "Achieving the Dream or the generator from proposal 7"
+    str source_file "for example data/raw/pdp_cohort_data.csv"
+    str file_sha256
+    int row_count
+    datetime loaded_at
+  }
+  student {
+    str student_id PK "Student_GUID"
+    int institution_id FK
+    str student_age
+    str race
+    str ethnicity
+    str gender
+    str first_gen
+  }
+  cohort_membership {
+    str student_id PK, FK "Student_GUID"
+    str cohort PK "Cohort"
+    int provider_id FK
+    str cohort_term
+    str enrollment_type
+    str enrollment_intensity_first_term
+    str math_placement
+    str english_placement
+    str dual_and_summer_enrollment
+    str pell_status_first_year
+    str attendance_status_term_1
+    str credential_type_sought_year_1
+    str program_of_study_term_1
+    float gpa_group_term_1
+    float gpa_group_year_1
+    float number_of_credits_attempted_yr_1
+    float number_of_credits_earned_yr_1
+    float number_of_credits_attempted_yr_2
+    float number_of_credits_earned_yr_2
+    float number_of_credits_attempted_yr_3
+    float number_of_credits_earned_yr_3
+    float number_of_credits_attempted_yr_4
+    float number_of_credits_earned_yr_4
+    str gateway_math_status
+    str gateway_english_status
+    str attempted_gateway_math_year1
+    str attempted_gateway_english_year1
+    str completed_gateway_math_year1
+    str completed_gateway_english_year1
+    str gateway_math_grade_y1
+    str gateway_english_grade_y1
+    str attempted_dev_math_y1
+    str attempted_dev_english_y1
+    str completed_dev_math_y1
+    str completed_dev_english_y1
+    bool retention
+    bool persistence
+    int years_to_ba_at_cohort_inst
+    int years_to_a_or_c_at_cohort_inst
+    int years_to_ba_at_other_inst
+    int years_to_a_or_c_at_other_inst
+    int years_of_last_enrollment_at_coho
+    int years_of_last_enrollment_at_othe
+    float time_to_credential
+    str reading_placement
+    str special_program
+    str naspa_first_generation
+    str incarcerated_status
+    str military_status
+    str employment_status
+    str disability_status
+    str foreign_language_completion
+    int first_year_to_bachelors_at_coh
+    int first_year_to_a_or_c_at_cohort
+    int first_year_to_bachelor_at_other
+    int first_year_to_a_or_c_at_other
+    str program_of_study_year_1
+    str s_most_recent_bachelors_at_o_i
+    str s_most_recent_associates_or_c
+    str s_most_recent_last_enroll_at_o
+    str s_first_bachelors_at_other_ins
+    str s_first_associates_or_cert
+    str c_most_recent_bachelors_at_o_i
+    str c_most_recent_associates_or_c
+    str c_most_recent_last_enroll_at_o
+    str c_first_bachelors_at_other_ins
+    str c_first_associates_or_cert
+    str l_most_recent_bachelors_at_o_i
+    str l_most_recent_associates_or_c
+    str l_most_recent_last_enroll_at_o
+    str l_first_bachelors_at_other_ins
+    str l_first_associates_or_cert
+    int years_to_latest_associates_at_co
+    int years_to_latest_certificate_at_c
+    int years_to_latest_associates_at_ot
+    int years_to_latest_certificate_at_o
+    int first_year_to_associates_at_coho
+    int first_year_to_certificate_at_coh
+    int first_year_to_associates_at_othe
+    int first_year_to_certificate_at_oth
+  }
+  term {
+    int term_id PK
+    str academic_year UK "Academic_Year"
+    str academic_term UK "Academic_Term"
+    int sort_order "plus one unknown term for blanks"
+  }
+  course {
+    int course_id PK
+    str course_prefix UK "Course_Prefix"
+    str course_number UK "Course_Number"
+  }
+  course_enrollment {
+    int enrollment_id PK
+    int provider_id FK, UK
+    int source_row_number UK "row in the raw course file"
+    str student_id FK "Student_GUID"
+    int course_id FK
+    int term_id FK
+    int attempt_number "retake order, rule documented"
+    str section_id
+    str course_name
+    str course_cip
+    str course_type
+    str math_or_english_gateway
+    str co_requisite_course
+    date course_begin_date
+    date course_end_date
+    str grade
+    float number_of_credits_attempted
+    float number_of_credits_earned
+    str delivery_method
+    str core_course
+    str core_course_type
+    str core_competency_completed
+    str enrolled_at_other_institution_s
+    str credential_engine_identifier
+    str course_instructor_employment_sta
+    str course_instructor_rank
+    str s_enrollment_record_at_other
+    str c_enrollment_record_at_other
+    str l_enrollment_record_at_other
+    str term_program_of_study
+  }
+  student_attribute {
+    int attribute_id PK
+    str student_id FK, UK
+    int term_id FK, UK "nullable"
+    str attribute_key UK "for example tribal_affiliation"
+    str attribute_value UK
+    str source UK
+  }
+  institution_event {
+    int event_id PK
+    int institution_id FK, UK
+    str event_type UK "closure, ceremony, powwow"
+    str name UK
+    date start_date UK
+    date end_date
+    str source
+  }

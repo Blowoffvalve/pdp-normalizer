@@ -1,0 +1,3 @@
+event_id,institution_id,event_type,name,start_date,end_date,source
+1,1,closure,Battle of Sugar Point (campus closed),2025-10-06,2025-10-06,"public: Leech Lake Tribal College 2025-27 Course Catalog, p.8, https://www.lltc.edu/wp-content/uploads/2026/02/LLTC-2025-27-Course-Catalog-2.9.26.pdf#page=8"
+2,1,powwow,United Tribes International Powwow,2026-09-11,2026-09-13,"public: KFYR 2026-09-14, https://www.kfyrtv.com/2026/09/14/56th-annual-uttc-international-powwow-wraps-up-with-grand-entry-softball-tournament/; dates inferred from 'the weekend after Labor Day'"
