@@ -1,8 +1,22 @@
-# Destination schema for the normalized data model (Milestone 1 spec, SC-2 and D8).
-# The only place column types are defined. One parent map per table; fields in column order. Each field has:
-#   type        Python type: str, int, float, bool, date, datetime.
-#   nullable    whether the stored value can be blank.
+# Destination schema for the normalized data model: what a valid STORED value looks like,
+# whichever file it came from (Milestone 2.1 spec, D2). How a particular file writes its values
+# (date formats, codes for "no value" and "unknown", repairs) goes in that file's mapping config.
+#
+# One parent map per table; fields in column order. Each field has:
+#   type            Python type: str, int, float, bool, date, datetime. The only place types are defined.
+#   nullable        whether the stored value can be blank.
 #   primary_key / foreign_key / unique   keys; fields sharing a unique group name are unique together.
+# and may have:
+#   default_value   stored when the source gives no value (D5).
+#   unknown_value   stored when the source says it doesn't know (D6). Text columns use UNKNOWN;
+#                   number, date and true/false columns have none, so unknown is stored blank.
+#   list_delimiter  the stored value is a list joined by this character; rules check each item.
+#   rules           checks on real values (not blank, default or unknown). One kind per rule, plus
+#                   severity: error (the row is held back) or warning (reported, still loaded).
+#                   Kinds: enum, value_set (a list in config/value_sets.yaml), pattern, minimum,
+#                   maximum, max_length, not_before, not_greater_than, required_when, academic_year.
+#                   enum and value_set take ignore_case and ignore_spaces; any rule takes `when`.
+#                   Names follow Frictionless Table Schema where it has one (D4). See the README.
 
 institution:
   institution_id: {type: int, nullable: false, primary_key: true}
@@ -18,106 +32,480 @@ data_provider:
   loaded_at: {type: datetime, nullable: false}
 
 student:
-  student_id: {type: str, nullable: false, primary_key: true}
+  student_id:
+    type: str
+    nullable: false
+    primary_key: true
+    rules:
+      - {pattern: '^[0-9A-Fa-f]{32}$', severity: error}
   institution_id: {type: int, nullable: false, foreign_key: institution.institution_id}
-  student_age: {type: str, nullable: true}
-  race: {type: str, nullable: true}
-  ethnicity: {type: str, nullable: true}
-  gender: {type: str, nullable: true}
-  first_gen: {type: str, nullable: true}
+  student_age:
+    type: str
+    nullable: true
+    unknown_value: UNKNOWN
+    rules:
+      - {enum: [20 and younger, '> 20-24', Older than 24], ignore_case: true, ignore_spaces: true, severity: error}
+  race:
+    type: str
+    nullable: true
+    unknown_value: UNKNOWN
+    rules:
+      - {enum: [Nonresident Alien, American Indian or Alaska Native, Asian, Black or African American, Native Hawaiian or Other Pacific Islander, White, Hispanic, Two or More Races], ignore_case: true, severity: error}
+  ethnicity:
+    type: str
+    nullable: true
+    unknown_value: UNKNOWN
+    rules:
+      - {enum: [H, N], severity: error}
+  gender:
+    type: str
+    nullable: true
+    unknown_value: UNKNOWN
+    rules:
+      - {enum: [M, F, P, X], severity: error}
+  first_gen:
+    type: str
+    nullable: true
+    rules:
+      - {enum: [N, P, C, A, B, E], severity: error}
 
 cohort_membership:
   student_id: {type: str, nullable: false, primary_key: true, foreign_key: student.student_id}
-  cohort: {type: str, nullable: false, primary_key: true}
+  cohort:
+    type: str
+    nullable: false
+    primary_key: true
+    rules:
+      - {academic_year: true, severity: error}
   provider_id: {type: int, nullable: false, foreign_key: data_provider.provider_id}
-  cohort_term: {type: str, nullable: false}
-  enrollment_type: {type: str, nullable: true}
-  enrollment_intensity_first_term: {type: str, nullable: true}
-  math_placement: {type: str, nullable: true}
-  english_placement: {type: str, nullable: true}
-  dual_and_summer_enrollment: {type: str, nullable: true}
-  pell_status_first_year: {type: str, nullable: true}
-  attendance_status_term_1: {type: str, nullable: true}
-  credential_type_sought_year_1: {type: str, nullable: true}
-  program_of_study_term_1: {type: str, nullable: true}
-  gpa_group_term_1: {type: float, nullable: true}
-  gpa_group_year_1: {type: float, nullable: true}
-  number_of_credits_attempted_yr_1: {type: float, nullable: true}
-  number_of_credits_earned_yr_1: {type: float, nullable: true}
-  number_of_credits_attempted_yr_2: {type: float, nullable: true}
-  number_of_credits_earned_yr_2: {type: float, nullable: true}
-  number_of_credits_attempted_yr_3: {type: float, nullable: true}
-  number_of_credits_earned_yr_3: {type: float, nullable: true}
-  number_of_credits_attempted_yr_4: {type: float, nullable: true}
-  number_of_credits_earned_yr_4: {type: float, nullable: true}
-  gateway_math_status: {type: str, nullable: true}
-  gateway_english_status: {type: str, nullable: true}
-  attempted_gateway_math_year1: {type: str, nullable: true}
-  attempted_gateway_english_year1: {type: str, nullable: true}
-  completed_gateway_math_year1: {type: str, nullable: true}
-  completed_gateway_english_year1: {type: str, nullable: true}
-  gateway_math_grade_y1: {type: str, nullable: true}
-  gateway_english_grade_y1: {type: str, nullable: true}
-  attempted_dev_math_y1: {type: str, nullable: true}
-  attempted_dev_english_y1: {type: str, nullable: true}
-  completed_dev_math_y1: {type: str, nullable: true}
-  completed_dev_english_y1: {type: str, nullable: true}
+  cohort_term:
+    type: str
+    nullable: false
+    rules:
+      - {value_set: academic_term, ignore_case: true, severity: error}
+  enrollment_type:
+    type: str
+    nullable: true
+    rules:
+      - {enum: [First-time, Re-admit, Transfer-in], ignore_case: true, severity: error}
+  enrollment_intensity_first_term:
+    type: str
+    nullable: true
+    unknown_value: UNKNOWN
+    rules:
+      - {enum: [Full-time, Part-time], ignore_case: true, severity: error}
+  math_placement:
+    type: str
+    nullable: true
+    unknown_value: UNKNOWN
+    rules:
+      - {value_set: placement, severity: error}
+  english_placement:
+    type: str
+    nullable: true
+    unknown_value: UNKNOWN
+    rules:
+      - {value_set: placement, severity: error}
+  dual_and_summer_enrollment:
+    type: str
+    nullable: true
+    unknown_value: UNKNOWN
+    rules:
+      - {enum: [DE, SE, DS], severity: error}
+  pell_status_first_year:
+    type: str
+    nullable: true
+    rules:
+      - {value_set: yes_no, severity: error}
+  attendance_status_term_1:
+    type: str
+    nullable: true
+    rules:
+      - {enum: [First-Time Full-Time, First-Time Part-Time, Transfer-In Full-Time, Transfer-In Part-Time], ignore_case: true, severity: error}
+  credential_type_sought_year_1:
+    type: str
+    nullable: true
+    unknown_value: UNKNOWN
+    rules:
+      - {enum: [C1, C2, C4, '01', A, '02', B, '03', PB, '04', M, '05', D, '06', FP, '07', PC, '08', NC, '99'], severity: error}
+  program_of_study_term_1:
+    type: str
+    nullable: true
+    rules:
+      - {pattern: '^[0-9]{6}$', severity: error}
+  gpa_group_term_1:
+    type: float
+    nullable: true
+    rules:
+      - {minimum: 0, maximum: 4, severity: error}
+  gpa_group_year_1:
+    type: float
+    nullable: true
+    rules:
+      - {minimum: 0, maximum: 4, severity: error}
+  number_of_credits_attempted_yr_1:
+    type: float
+    nullable: true
+    rules:
+      - {minimum: 1, severity: error}
+  number_of_credits_earned_yr_1:
+    type: float
+    nullable: true
+    rules:
+      - {minimum: 0, severity: error}
+  number_of_credits_attempted_yr_2:
+    type: float
+    nullable: true
+    rules:
+      - {minimum: 0, severity: error}
+  number_of_credits_earned_yr_2:
+    type: float
+    nullable: true
+    rules:
+      - {minimum: 0, severity: error}
+  number_of_credits_attempted_yr_3:
+    type: float
+    nullable: true
+    rules:
+      - {minimum: 0, severity: error}
+  number_of_credits_earned_yr_3:
+    type: float
+    nullable: true
+    rules:
+      - {minimum: 0, severity: error}
+  number_of_credits_attempted_yr_4:
+    type: float
+    nullable: true
+    rules:
+      - {minimum: 0, severity: error}
+  number_of_credits_earned_yr_4:
+    type: float
+    nullable: true
+    rules:
+      - {minimum: 0, severity: error}
+  gateway_math_status:
+    type: str
+    nullable: true
+    unknown_value: UNKNOWN
+    rules:
+      - {value_set: gateway_status, severity: error}
+  gateway_english_status:
+    type: str
+    nullable: true
+    unknown_value: UNKNOWN
+    rules:
+      - {value_set: gateway_status, severity: error}
+  attempted_gateway_math_year1:
+    type: str
+    nullable: true
+    unknown_value: UNKNOWN
+    rules:
+      - {value_set: yes_no, severity: error}
+  attempted_gateway_english_year1:
+    type: str
+    nullable: true
+    unknown_value: UNKNOWN
+    rules:
+      - {value_set: yes_no, severity: error}
+  completed_gateway_math_year1:
+    type: str
+    nullable: true
+    rules:
+      - {value_set: completed_c_d_na, severity: error}
+  completed_gateway_english_year1:
+    type: str
+    nullable: true
+    rules:
+      - {value_set: completed_c_d_na, severity: error}
+  gateway_math_grade_y1:
+    type: str
+    nullable: true
+    unknown_value: UNKNOWN
+    rules:
+      - {pattern: '^(4(\.0+)?|[0-3](\.[0-9]+)?|P|F|I|W|A|O)$', severity: error}
+  gateway_english_grade_y1:
+    type: str
+    nullable: true
+    unknown_value: UNKNOWN
+    rules:
+      - {pattern: '^(4(\.0+)?|[0-3](\.[0-9]+)?|P|F|I|W|A|O)$', severity: error}
+  attempted_dev_math_y1:
+    type: str
+    nullable: true
+    unknown_value: UNKNOWN
+    rules:
+      - {value_set: yes_no_na, severity: error}
+  attempted_dev_english_y1:
+    type: str
+    nullable: true
+    unknown_value: UNKNOWN
+    rules:
+      - {value_set: yes_no_na, severity: error}
+  completed_dev_math_y1:
+    type: str
+    nullable: true
+    rules:
+      - {value_set: completed_c_d_na, severity: error}
+  completed_dev_english_y1:
+    type: str
+    nullable: true
+    rules:
+      - {value_set: completed_c_d_na, severity: error}
   retention: {type: bool, nullable: true}
   persistence: {type: bool, nullable: true}
-  years_to_ba_at_cohort_inst: {type: int, nullable: true}
-  years_to_a_or_c_at_cohort_inst: {type: int, nullable: true}
-  years_to_ba_at_other_inst: {type: int, nullable: true}
-  years_to_a_or_c_at_other_inst: {type: int, nullable: true}
-  years_of_last_enrollment_at_coho: {type: int, nullable: true}
-  years_of_last_enrollment_at_othe: {type: int, nullable: true}
-  time_to_credential: {type: float, nullable: true}
-  reading_placement: {type: str, nullable: true}
+  years_to_ba_at_cohort_inst:
+    type: int
+    nullable: true
+    rules:
+      - {value_set: count_0_to_7, severity: error}
+  years_to_a_or_c_at_cohort_inst:
+    type: int
+    nullable: true
+    rules:
+      - {value_set: count_0_to_7, severity: error}
+  years_to_ba_at_other_inst:
+    type: int
+    nullable: true
+    rules:
+      - {value_set: count_0_to_7, severity: error}
+  years_to_a_or_c_at_other_inst:
+    type: int
+    nullable: true
+    rules:
+      - {value_set: count_0_to_7, severity: error}
+  years_of_last_enrollment_at_coho:
+    type: int
+    nullable: true
+    rules:
+      - {value_set: count_0_to_7, severity: error}
+  years_of_last_enrollment_at_othe:
+    type: int
+    nullable: true
+    rules:
+      - {value_set: count_0_to_7, severity: error}
+  time_to_credential:
+    type: float
+    nullable: true
+    rules:
+      - {minimum: 0, severity: error}
+      - {pattern: '^[0-9]+(\.[0-9])?$', severity: error}
+  reading_placement:
+    type: str
+    nullable: true
+    unknown_value: UNKNOWN
+    rules:
+      - {value_set: placement, severity: error}
   special_program: {type: str, nullable: true}
-  naspa_first_generation: {type: str, nullable: true}
-  incarcerated_status: {type: str, nullable: true}
-  military_status: {type: str, nullable: true}
-  employment_status: {type: str, nullable: true}
-  disability_status: {type: str, nullable: true}
-  foreign_language_completion: {type: str, nullable: true}
-  first_year_to_bachelors_at_coh: {type: int, nullable: true}
-  first_year_to_a_or_c_at_cohort: {type: int, nullable: true}
-  first_year_to_bachelor_at_other: {type: int, nullable: true}
-  first_year_to_a_or_c_at_other: {type: int, nullable: true}
-  program_of_study_year_1: {type: str, nullable: true}
-  s_most_recent_bachelors_at_o_i: {type: str, nullable: true}
-  s_most_recent_associates_or_c: {type: str, nullable: true}
-  s_most_recent_last_enroll_at_o: {type: str, nullable: true}
-  s_first_bachelors_at_other_ins: {type: str, nullable: true}
-  s_first_associates_or_cert: {type: str, nullable: true}
-  c_most_recent_bachelors_at_o_i: {type: str, nullable: true}
-  c_most_recent_associates_or_c: {type: str, nullable: true}
-  c_most_recent_last_enroll_at_o: {type: str, nullable: true}
-  c_first_bachelors_at_other_ins: {type: str, nullable: true}
-  c_first_associates_or_cert: {type: str, nullable: true}
-  l_most_recent_bachelors_at_o_i: {type: str, nullable: true}
-  l_most_recent_associates_or_c: {type: str, nullable: true}
-  l_most_recent_last_enroll_at_o: {type: str, nullable: true}
-  l_first_bachelors_at_other_ins: {type: str, nullable: true}
-  l_first_associates_or_cert: {type: str, nullable: true}
-  years_to_latest_associates_at_co: {type: int, nullable: true}
-  years_to_latest_certificate_at_c: {type: int, nullable: true}
-  years_to_latest_associates_at_ot: {type: int, nullable: true}
-  years_to_latest_certificate_at_o: {type: int, nullable: true}
-  first_year_to_associates_at_coho: {type: int, nullable: true}
-  first_year_to_certificate_at_coh: {type: int, nullable: true}
-  first_year_to_associates_at_othe: {type: int, nullable: true}
-  first_year_to_certificate_at_oth: {type: int, nullable: true}
+  naspa_first_generation:
+    type: str
+    nullable: true
+    unknown_value: UNKNOWN
+    rules:
+      - {enum: ['0', '1', '2', '3', '4', '5', '6'], severity: error}
+  incarcerated_status:
+    type: str
+    nullable: true
+    unknown_value: UNKNOWN
+    rules:
+      - {enum: [Y, P, N], severity: error}
+  military_status:
+    type: str
+    nullable: true
+    unknown_value: UNKNOWN
+    rules:
+      - {enum: ['0', '1', '2'], severity: error}
+  employment_status:
+    type: str
+    nullable: true
+    unknown_value: UNKNOWN
+    rules:
+      - {enum: ['1', '2', '3', '4'], severity: error}
+  disability_status:
+    type: str
+    nullable: true
+    unknown_value: UNKNOWN
+    rules:
+      - {value_set: yes_no, severity: error}
+  foreign_language_completion:
+    type: str
+    nullable: true
+    rules:
+      - {pattern: '^((FALL|WINTER|SPRING|SUMMER) [0-9]{4}|N)$', severity: error}
+  first_year_to_bachelors_at_coh:
+    type: int
+    nullable: true
+    rules:
+      - {value_set: count_0_to_7, severity: error}
+  first_year_to_a_or_c_at_cohort:
+    type: int
+    nullable: true
+    rules:
+      - {value_set: count_0_to_7, severity: error}
+  first_year_to_bachelor_at_other:
+    type: int
+    nullable: true
+    rules:
+      - {value_set: count_0_to_7, severity: error}
+  first_year_to_a_or_c_at_other:
+    type: int
+    nullable: true
+    rules:
+      - {value_set: count_0_to_7, severity: error}
+  program_of_study_year_1:
+    type: str
+    nullable: true
+    rules:
+      - {pattern: '^[0-9]{6}$', severity: error}
+  s_most_recent_bachelors_at_o_i:
+    type: str
+    nullable: true
+    rules:
+      - {pattern: '^[A-Z]{2}$', severity: error}
+  s_most_recent_associates_or_c:
+    type: str
+    nullable: true
+    rules:
+      - {pattern: '^[A-Z]{2}$', severity: error}
+  s_most_recent_last_enroll_at_o:
+    type: str
+    nullable: true
+    rules:
+      - {pattern: '^[A-Z]{2}$', severity: error}
+  s_first_bachelors_at_other_ins:
+    type: str
+    nullable: true
+    rules:
+      - {pattern: '^[A-Z]{2}$', severity: error}
+  s_first_associates_or_cert:
+    type: str
+    nullable: true
+    rules:
+      - {pattern: '^[A-Z]{2}$', severity: error}
+  c_most_recent_bachelors_at_o_i:
+    type: str
+    nullable: true
+    rules:
+      - {pattern: '^[A-Za-z][A-Za-z'' &/-]*$', severity: error}
+  c_most_recent_associates_or_c:
+    type: str
+    nullable: true
+    rules:
+      - {pattern: '^[A-Za-z][A-Za-z'' &/-]*$', severity: error}
+  c_most_recent_last_enroll_at_o:
+    type: str
+    nullable: true
+    rules:
+      - {pattern: '^[A-Za-z][A-Za-z'' &/-]*$', severity: error}
+  c_first_bachelors_at_other_ins:
+    type: str
+    nullable: true
+    rules:
+      - {pattern: '^[A-Za-z][A-Za-z'' &/-]*$', severity: error}
+  c_first_associates_or_cert:
+    type: str
+    nullable: true
+    rules:
+      - {pattern: '^[A-Za-z][A-Za-z'' &/-]*$', severity: error}
+  l_most_recent_bachelors_at_o_i:
+    type: str
+    nullable: true
+    rules:
+      - {value_set: locale, severity: error}
+  l_most_recent_associates_or_c:
+    type: str
+    nullable: true
+    rules:
+      - {value_set: locale, severity: error}
+  l_most_recent_last_enroll_at_o:
+    type: str
+    nullable: true
+    rules:
+      - {value_set: locale, severity: error}
+  l_first_bachelors_at_other_ins:
+    type: str
+    nullable: true
+    rules:
+      - {value_set: locale, severity: error}
+  l_first_associates_or_cert:
+    type: str
+    nullable: true
+    rules:
+      - {value_set: locale, severity: error}
+  years_to_latest_associates_at_co:
+    type: int
+    nullable: true
+    rules:
+      - {value_set: count_0_to_7, severity: error}
+  years_to_latest_certificate_at_c:
+    type: int
+    nullable: true
+    rules:
+      - {value_set: count_0_to_7, severity: error}
+  years_to_latest_associates_at_ot:
+    type: int
+    nullable: true
+    rules:
+      - {value_set: count_0_to_7, severity: error}
+  years_to_latest_certificate_at_o:
+    type: int
+    nullable: true
+    rules:
+      - {value_set: count_0_to_7, severity: error}
+  first_year_to_associates_at_coho:
+    type: int
+    nullable: true
+    rules:
+      - {value_set: count_0_to_7, severity: error}
+  first_year_to_certificate_at_coh:
+    type: int
+    nullable: true
+    rules:
+      - {value_set: count_0_to_7, severity: error}
+  first_year_to_associates_at_othe:
+    type: int
+    nullable: true
+    rules:
+      - {value_set: count_0_to_7, severity: error}
+  first_year_to_certificate_at_oth:
+    type: int
+    nullable: true
+    rules:
+      - {value_set: count_0_to_7, severity: error}
 
 term:
   term_id: {type: int, nullable: false, primary_key: true}
-  academic_year: {type: str, nullable: false, unique: term_key}
-  academic_term: {type: str, nullable: false, unique: term_key}
+  academic_year:
+    type: str
+    nullable: false
+    unique: term_key
+    default_value: UNKNOWN
+    unknown_value: UNKNOWN
+    rules:
+      - {academic_year: true, severity: error}
+  academic_term:
+    type: str
+    nullable: false
+    unique: term_key
+    default_value: UNKNOWN
+    unknown_value: UNKNOWN
+    rules:
+      - {value_set: academic_term, ignore_case: true, severity: error}
   sort_order: {type: int, nullable: false}
 
 course:
   course_id: {type: int, nullable: false, primary_key: true}
-  course_prefix: {type: str, nullable: false, unique: course_code}
-  course_number: {type: str, nullable: false, unique: course_code}
+  course_prefix:
+    type: str
+    nullable: false
+    unique: course_code
+    rules:
+      - {pattern: '^[A-Za-z0-9._&-]+$', severity: error}
+  course_number:
+    type: str
+    nullable: false
+    unique: course_code
+    rules:
+      - {pattern: '^[A-Za-z0-9._&-]+$', severity: error}
 
 course_enrollment:
   enrollment_id: {type: int, nullable: false, primary_key: true}
@@ -127,43 +515,154 @@ course_enrollment:
   course_id: {type: int, nullable: true, foreign_key: course.course_id}
   term_id: {type: int, nullable: false, foreign_key: term.term_id}
   attempt_number: {type: int, nullable: true}   # blank on rows with no course record
-  section_id: {type: str, nullable: true}
-  course_name: {type: str, nullable: true}
-  course_cip: {type: str, nullable: true}
-  course_type: {type: str, nullable: true}
-  math_or_english_gateway: {type: str, nullable: true}
-  co_requisite_course: {type: str, nullable: true}
+  section_id:
+    type: str
+    nullable: true
+    unknown_value: UNKNOWN
+    rules:
+      - {pattern: '^[A-Za-z0-9._&-]+$', severity: error}
+      - {required_when: {column: course.course_prefix, present: true}, severity: error}
+  course_name:
+    type: str
+    nullable: true
+    unknown_value: UNKNOWN
+    rules:
+      - {required_when: {column: course.course_prefix, present: true}, severity: error}
+  course_cip:
+    type: str
+    nullable: true
+    unknown_value: UNKNOWN
+    rules:
+      - {pattern: '^[0-9]{2}\.[0-9]{4}$', severity: error}
+      - {required_when: {column: course.course_prefix, present: true}, severity: error}
+  course_type:
+    type: str
+    nullable: true
+    rules:
+      - {enum: [CU, CG, CC, CD, EL, AB, GE, NC, O], severity: error}
+      - {required_when: {column: course.course_prefix, present: true}, severity: error}
+  math_or_english_gateway:
+    type: str
+    nullable: true
+    rules:
+      - {enum: [M, E, N], severity: error}
+      - {required_when: {column: course.course_prefix, present: true}, severity: error}
+  co_requisite_course:
+    type: str
+    nullable: true
+    rules:
+      - {value_set: yes_no, severity: error}
   course_begin_date: {type: date, nullable: true}
-  course_end_date: {type: date, nullable: true}
-  grade: {type: str, nullable: true}
-  number_of_credits_attempted: {type: float, nullable: true}
-  number_of_credits_earned: {type: float, nullable: true}
-  delivery_method: {type: str, nullable: true}
-  core_course: {type: str, nullable: true}
-  core_course_type: {type: str, nullable: true}
-  core_competency_completed: {type: str, nullable: true}
-  enrolled_at_other_institution_s: {type: str, nullable: true}
+  course_end_date:
+    type: date
+    nullable: true
+    rules:
+      - {not_before: course_begin_date, severity: error}
+  grade:
+    type: str
+    nullable: true
+    unknown_value: UNKNOWN
+    rules:
+      - {pattern: '^(4(\.0+)?|[0-3](\.[0-9]+)?|P|F|I|W|A|O)$', severity: error}
+  number_of_credits_attempted:
+    type: float
+    nullable: true
+    rules:
+      - {minimum: 0, maximum: 20, severity: error}
+  number_of_credits_earned:
+    type: float
+    nullable: true
+    rules:
+      - {minimum: 0, maximum: 20, severity: error}
+      - {not_greater_than: number_of_credits_attempted, severity: error}
+  delivery_method:
+    type: str
+    nullable: true
+    rules:
+      - {enum: [F, O, H], severity: error}
+  core_course:
+    type: str
+    nullable: true
+    rules:
+      - {value_set: yes_no, severity: error}
+  core_course_type:
+    type: str
+    nullable: true
+    rules:
+      - {max_length: 20, severity: error}
+      - {required_when: {column: core_course, equals: Y}, severity: error}
+  core_competency_completed:
+    type: str
+    nullable: true
+    rules:
+      - {value_set: yes_no, severity: error}
+  enrolled_at_other_institution_s:
+    type: str
+    nullable: true
+    rules:
+      - {value_set: yes_no, severity: error}
   credential_engine_identifier: {type: str, nullable: true}
-  course_instructor_employment_sta: {type: str, nullable: true}
-  course_instructor_rank: {type: str, nullable: true}
-  s_enrollment_record_at_other: {type: str, nullable: true}
-  c_enrollment_record_at_other: {type: str, nullable: true}
-  l_enrollment_record_at_other: {type: str, nullable: true}
-  term_program_of_study: {type: str, nullable: true}
+  course_instructor_employment_sta:
+    type: str
+    nullable: true
+    rules:
+      - {enum: [PT, FT], severity: error}
+  course_instructor_rank:
+    type: str
+    nullable: true
+    rules:
+      - {enum: ['1', '2', '3', '4', '5', '6', '7'], severity: error}
+  s_enrollment_record_at_other:
+    type: str
+    nullable: true
+    list_delimiter: '|'
+    rules:
+      - {pattern: '^[A-Z]{2}$', severity: error}
+  c_enrollment_record_at_other:
+    type: str
+    nullable: true
+    list_delimiter: '|'
+    rules:
+      - {pattern: '^[A-Za-z][A-Za-z'' &/-]*$', severity: error}
+  l_enrollment_record_at_other:
+    type: str
+    nullable: true
+    list_delimiter: '|'
+    rules:
+      - {value_set: locale, severity: error}
+  term_program_of_study:
+    type: str
+    nullable: true
+    rules:
+      - {pattern: '^[0-9]{6}$', severity: error}
 
 student_attribute:
   attribute_id: {type: int, nullable: false, primary_key: true}
   student_id: {type: str, nullable: false, foreign_key: student.student_id, unique: attribute_fact}
   term_id: {type: int, nullable: true, foreign_key: term.term_id, unique: attribute_fact}
   attribute_key: {type: str, nullable: false, unique: attribute_fact}
-  attribute_value: {type: str, nullable: false, unique: attribute_fact}
+  attribute_value:
+    type: str
+    nullable: false
+    unique: attribute_fact
+    rules:
+      - {enum: ['true', 'false'], when: {column: attribute_key, equals: uses_on_campus_housing}, severity: error}
   source: {type: str, nullable: false, unique: attribute_fact}
 
 institution_event:
   event_id: {type: int, nullable: false, primary_key: true}
   institution_id: {type: int, nullable: false, foreign_key: institution.institution_id, unique: event_fact}
-  event_type: {type: str, nullable: false, unique: event_fact}
+  event_type:
+    type: str
+    nullable: false
+    unique: event_fact
+    rules:
+      - {enum: [closure, ceremony, powwow], severity: error}
   name: {type: str, nullable: false, unique: event_fact}
   start_date: {type: date, nullable: false, unique: event_fact}
-  end_date: {type: date, nullable: false}
+  end_date:
+    type: date
+    nullable: false
+    rules:
+      - {not_before: start_date, severity: error}
   source: {type: str, nullable: true}

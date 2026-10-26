@@ -1,9 +1,18 @@
-# Where each column of the course Analysis-Ready File goes (Milestone 1 spec, SC-1). Run on every load.
-# Types are not here: they come from config/destination_schema.yaml (Milestone 1 D8).
+# How the course Analysis-Ready File writes its values, and where each column goes (Milestone 2.1 spec, D2).
+# Run on every load. What a valid stored value looks like (types, allowed values, ranges) is NOT
+# here: it's in config/destination_schema.yaml, the same for every file that writes the column.
 #
-# Each entry: source, destination_table, destination_column and on_conflict (append, replace or
-# keep: what the loader does when the destination row already holds a value).
+# Each entry: source (or value, a fixed value for every row), destination_table,
+# destination_column and on_conflict (append, replace or keep: what the loader does when the
+# destination row already holds a value). Where they apply:
+#   format          how a date is written, as a strptime pattern.
+#   true_values / false_values   how a true/false value is written.
+#   value_map       known variants and their repaired values (D7).
+#   missing_values  codes this file uses for "no value" (D5). A blank cell always means no value.
+#   unknown_values  codes this file uses for "unknown" (D6).
+#   must_exist      the row must already have been written by another file in the same run.
 # A source column with no destination is marked `dropped:` with the reason.
+# Allowed values come from data/dictionaries/arf_course_data_dictionary.md in the starter repo.
 # 17,755 rows have no course record (the student was enrolled elsewhere that term, or the term is
 # unknown): course fields are blank on those rows, and course_enrollment.course_id is blank (M1 P9).
 
@@ -15,36 +24,44 @@
 - source: Student_GUID
   destination_table: student
   destination_column: student_id
+  must_exist: true
   on_conflict: keep         # finds the student row the cohort file wrote
 
 - source: Student_GUID
   destination_table: cohort_membership
   destination_column: student_id
+  must_exist: true
   on_conflict: keep         # with Cohort, finds the cohort row the cohort file wrote
 
 - source: Student_Age
   destination_table: student
   destination_column: student_age
+  unknown_values: [Unknown]
   on_conflict: keep         # always equals the cohort file's value today
 
 - source: Race
   destination_table: student
   destination_column: race
+  value_map: {American Indian or Alaska: American Indian or Alaska Native, Native Hawaiian or Other: Native Hawaiian or Other Pacific Islander}
+  unknown_values: [Unknown, Unknown or missing]
   on_conflict: keep
 
 - source: Ethnicity
   destination_table: student
   destination_column: ethnicity
+  unknown_values: [UK]
   on_conflict: keep
 
 - source: Gender
   destination_table: student
   destination_column: gender
+  unknown_values: [UK]
   on_conflict: keep
 
 - source: Cohort
   destination_table: cohort_membership
   destination_column: cohort
+  must_exist: true
   on_conflict: keep
 
 - source: Cohort_Term
@@ -75,16 +92,19 @@
 - source: Section_ID
   destination_table: course_enrollment
   destination_column: section_id
+  unknown_values: [UK, Missing]
   on_conflict: replace
 
 - source: Course_Name
   destination_table: course_enrollment
   destination_column: course_name
+  unknown_values: [UK, MISSING]
   on_conflict: replace
 
 - source: Course_CIP
   destination_table: course_enrollment
   destination_column: course_cip
+  unknown_values: [MISSING]
   on_conflict: replace
 
 - source: Course_Type
@@ -105,26 +125,33 @@
 - source: Course_Begin_Date
   destination_table: course_enrollment
   destination_column: course_begin_date
+  format: '%Y%m%d'
+  missing_values: [.]
   on_conflict: replace
 
 - source: Course_End_Date
   destination_table: course_enrollment
   destination_column: course_end_date
+  format: '%Y%m%d'
+  missing_values: [.]
   on_conflict: replace
 
 - source: Grade
   destination_table: course_enrollment
   destination_column: grade
+  unknown_values: [M, UK]
   on_conflict: replace
 
 - source: Number_of_Credits_Attempted
   destination_table: course_enrollment
   destination_column: number_of_credits_attempted
+  missing_values: [.]
   on_conflict: replace
 
 - source: Number_of_Credits_Earned
   destination_table: course_enrollment
   destination_column: number_of_credits_earned
+  missing_values: [.]
   on_conflict: replace
 
 - source: Delivery_Method

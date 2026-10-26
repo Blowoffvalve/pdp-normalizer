@@ -1,0 +1,11 @@
+# Value lists that rules in config/destination_schema.yaml refer to by name (`value_set:`).
+# A list used by more than one column is written once, here (Milestone 2.1 SC-4).
+
+academic_term: [Fall, Winter, Spring, Summer]
+yes_no: [Y, N]
+yes_no_na: [Y, N, NA]
+placement: [C, N]
+gateway_status: [R, N]
+completed_c_d_na: [C, D, NA]
+count_0_to_7: [0, 1, 2, 3, 4, 5, 6, 7]
+locale: [Urban, Suburb, Town/Rural]

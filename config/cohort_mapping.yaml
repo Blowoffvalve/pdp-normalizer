@@ -1,9 +1,18 @@
-# Where each column of the cohort Analysis-Ready File goes (Milestone 1 spec, SC-1). Run on every load.
-# Types are not here: they come from config/destination_schema.yaml (Milestone 1 D8).
+# How the cohort Analysis-Ready File writes its values, and where each column goes (Milestone 2.1 spec, D2).
+# Run on every load. What a valid stored value looks like (types, allowed values, ranges) is NOT
+# here: it's in config/destination_schema.yaml, the same for every file that writes the column.
 #
-# Each entry: source, destination_table, destination_column and on_conflict (append, replace or
-# keep: what the loader does when the destination row already holds a value).
+# Each entry: source (or value, a fixed value for every row), destination_table,
+# destination_column and on_conflict (append, replace or keep: what the loader does when the
+# destination row already holds a value). Where they apply:
+#   format          how a date is written, as a strptime pattern.
+#   true_values / false_values   how a true/false value is written.
+#   value_map       known variants and their repaired values (D7).
+#   missing_values  codes this file uses for "no value" (D5). A blank cell always means no value.
+#   unknown_values  codes this file uses for "unknown" (D6).
+#   must_exist      the row must already have been written by another file in the same run.
 # A source column with no destination is marked `dropped:` with the reason.
+# Allowed values come from data/dictionaries/arf_cohort_data_dictionary.md in the starter repo.
 
 - source: Cohort
   destination_table: cohort_membership
@@ -28,6 +37,7 @@
 - source: Student_Age
   destination_table: student
   destination_column: student_age
+  unknown_values: [Unknown]
   on_conflict: replace   # latest cohort row wins for the 2 students with two cohort rows (D6)
 
 - source: Enrollment_Type
@@ -38,36 +48,44 @@
 - source: Enrollment_Intensity_First_Term
   destination_table: cohort_membership
   destination_column: enrollment_intensity_first_term
+  unknown_values: [Unknown]
   on_conflict: replace
 
 - source: Math_Placement
   destination_table: cohort_membership
   destination_column: math_placement
+  unknown_values: [UK]
   on_conflict: replace
 
 - source: English_Placement
   destination_table: cohort_membership
   destination_column: english_placement
+  unknown_values: [UK]
   on_conflict: replace
 
 - source: Dual_and_Summer_Enrollment
   destination_table: cohort_membership
   destination_column: dual_and_summer_enrollment
+  unknown_values: [UK]
   on_conflict: replace
 
 - source: Race
   destination_table: student
   destination_column: race
+  value_map: {American Indian or Alaska: American Indian or Alaska Native, Native Hawaiian or Other: Native Hawaiian or Other Pacific Islander}
+  unknown_values: [Unknown]
   on_conflict: replace   # latest cohort row wins for the 2 students with two cohort rows (D6)
 
 - source: Ethnicity
   destination_table: student
   destination_column: ethnicity
+  unknown_values: [UK]
   on_conflict: replace   # latest cohort row wins for the 2 students with two cohort rows (D6)
 
 - source: Gender
   destination_table: student
   destination_column: gender
+  unknown_values: [UK]
   on_conflict: replace   # latest cohort row wins for the 2 students with two cohort rows (D6)
 
 - source: First_Gen
@@ -88,6 +106,7 @@
 - source: Credential_Type_Sought_Year_1
   destination_table: cohort_membership
   destination_column: credential_type_sought_year_1
+  unknown_values: ['-1']
   on_conflict: replace
 
 - source: Program_of_Study_Term_1
@@ -98,71 +117,85 @@
 - source: GPA_Group_Term_1
   destination_table: cohort_membership
   destination_column: gpa_group_term_1
+  unknown_values: [UK]
   on_conflict: replace
 
 - source: GPA_Group_Year_1
   destination_table: cohort_membership
   destination_column: gpa_group_year_1
+  unknown_values: [UK]
   on_conflict: replace
 
 - source: Number_of_Credits_Attempted_Yr_1
   destination_table: cohort_membership
   destination_column: number_of_credits_attempted_yr_1
+  missing_values: [.]
   on_conflict: replace
 
 - source: Number_of_Credits_Earned_Yr_1
   destination_table: cohort_membership
   destination_column: number_of_credits_earned_yr_1
+  missing_values: [.]
   on_conflict: replace
 
 - source: Number_of_Credits_Attempted_Yr_2
   destination_table: cohort_membership
   destination_column: number_of_credits_attempted_yr_2
+  missing_values: [.]
   on_conflict: replace
 
 - source: Number_of_Credits_Earned_Yr_2
   destination_table: cohort_membership
   destination_column: number_of_credits_earned_yr_2
+  missing_values: [.]
   on_conflict: replace
 
 - source: Number_of_Credits_Attempted_Yr_3
   destination_table: cohort_membership
   destination_column: number_of_credits_attempted_yr_3
+  missing_values: [.]
   on_conflict: replace
 
 - source: Number_of_Credits_Earned_Yr_3
   destination_table: cohort_membership
   destination_column: number_of_credits_earned_yr_3
+  missing_values: [.]
   on_conflict: replace
 
 - source: Number_of_Credits_Attempted_Yr_4
   destination_table: cohort_membership
   destination_column: number_of_credits_attempted_yr_4
+  missing_values: [.]
   on_conflict: replace
 
 - source: Number_of_Credits_Earned_Yr_4
   destination_table: cohort_membership
   destination_column: number_of_credits_earned_yr_4
+  missing_values: [.]
   on_conflict: replace
 
 - source: Gateway_Math_Status
   destination_table: cohort_membership
   destination_column: gateway_math_status
+  unknown_values: [UK]
   on_conflict: replace
 
 - source: Gateway_English_Status
   destination_table: cohort_membership
   destination_column: gateway_english_status
+  unknown_values: [UK]
   on_conflict: replace
 
 - source: AttemptedGatewayMathYear1
   destination_table: cohort_membership
   destination_column: attempted_gateway_math_year1
+  unknown_values: [UK]
   on_conflict: replace
 
 - source: AttemptedGatewayEnglishYear1
   destination_table: cohort_membership
   destination_column: attempted_gateway_english_year1
+  unknown_values: [UK]
   on_conflict: replace
 
 - source: CompletedGatewayMathYear1
@@ -178,21 +211,25 @@
 - source: GatewayMathGradeY1
   destination_table: cohort_membership
   destination_column: gateway_math_grade_y1
+  unknown_values: [M]
   on_conflict: replace
 
 - source: GatewayEnglishGradeY1
   destination_table: cohort_membership
   destination_column: gateway_english_grade_y1
+  unknown_values: [M]
   on_conflict: replace
 
 - source: AttemptedDevMathY1
   destination_table: cohort_membership
   destination_column: attempted_dev_math_y1
+  unknown_values: [UK]
   on_conflict: replace
 
 - source: AttemptedDevEnglishY1
   destination_table: cohort_membership
   destination_column: attempted_dev_english_y1
+  unknown_values: [UK]
   on_conflict: replace
 
 - source: CompletedDevMathY1
@@ -208,11 +245,15 @@
 - source: Retention
   destination_table: cohort_membership
   destination_column: retention
+  true_values: ['1']
+  false_values: ['0']
   on_conflict: replace
 
 - source: Persistence
   destination_table: cohort_membership
   destination_column: persistence
+  true_values: ['1']
+  false_values: ['0']
   on_conflict: replace
 
 - source: Years_to_BA_at_cohort_inst
@@ -248,11 +289,13 @@
 - source: Time_to_Credential
   destination_table: cohort_membership
   destination_column: time_to_credential
+  missing_values: [.]
   on_conflict: replace
 
 - source: Reading_Placement
   destination_table: cohort_membership
   destination_column: reading_placement
+  unknown_values: [UK]
   on_conflict: replace
 
 - source: SpecialProgram
@@ -263,26 +306,31 @@
 - source: NASPAFirstGeneration
   destination_table: cohort_membership
   destination_column: naspa_first_generation
+  unknown_values: ['-1']
   on_conflict: replace
 
 - source: IncarceratedStatus
   destination_table: cohort_membership
   destination_column: incarcerated_status
+  unknown_values: [UK]
   on_conflict: replace
 
 - source: MilitaryStatus
   destination_table: cohort_membership
   destination_column: military_status
+  unknown_values: ['-1']
   on_conflict: replace
 
 - source: EmploymentStatus
   destination_table: cohort_membership
   destination_column: employment_status
+  unknown_values: ['-1', '0']
   on_conflict: replace
 
 - source: DisabilityStatus
   destination_table: cohort_membership
   destination_column: disability_status
+  unknown_values: [UK]
   on_conflict: replace
 
 - source: ForeignLanguageCompletion
