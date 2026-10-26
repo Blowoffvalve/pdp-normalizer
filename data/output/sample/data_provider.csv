@@ -1,0 +1,5 @@
+provider_id,name,source_file,file_sha256,row_count,loaded_at
+1,Achieving the Dream,data/input/pdp_cohort_data.csv,9999665ac361ec383af1ae6d8469cf835594b1da8cee457a1b69b9ab9add12f4,11,2026-10-25T00:00:00
+2,Achieving the Dream,data/input/pdp_course_data.csv,aeec24ffae871468ae0b6288b77f944bd32c466c1b2412529a5ba3052b5ed21a,52,2026-10-25T00:00:00
+3,synthetic: on-campus housing generator,data/input/enrichment/on_campus_housing.csv,0e83ef2a3345677dd81872b51d8ac49a82d802d7a7ec3966a478896a39555fd5,7,2026-10-25T00:00:00
+4,public: institution events,data/input/enrichment/institution_events.csv,b611aafee147c74bfe7310a5af00abf8a8e00a0f95a1bcaf4a2f6055e9a09cb6,2,2026-10-25T00:00:00

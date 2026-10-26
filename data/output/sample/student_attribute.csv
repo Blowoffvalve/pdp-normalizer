@@ -1,0 +1,8 @@
+attribute_id,student_id,term_id,attribute_key,attribute_value,source
+1,0110949EC5F26B13E0531B64C70A9D19,3,uses_on_campus_housing,true,"synthetic: src/generator/enrichment/on_campus_housing.py, seed 2026"
+2,0110949EC5F26B13E0531B64C70A9D19,13,uses_on_campus_housing,true,"synthetic: src/generator/enrichment/on_campus_housing.py, seed 2026"
+3,0110949EC5F26B13E0531B64C70A9D19,12,uses_on_campus_housing,true,"synthetic: src/generator/enrichment/on_campus_housing.py, seed 2026"
+4,0110949EC5F26B13E0531B64C70A9D19,4,uses_on_campus_housing,true,"synthetic: src/generator/enrichment/on_campus_housing.py, seed 2026"
+5,0110949EC5F26B13E0531B64C70A9D19,9,uses_on_campus_housing,true,"synthetic: src/generator/enrichment/on_campus_housing.py, seed 2026"
+6,0110949EC5F26B13E0531B64C70A9D19,14,uses_on_campus_housing,true,"synthetic: src/generator/enrichment/on_campus_housing.py, seed 2026"
+7,0110949EC5F26B13E0531B64C70A9D19,6,uses_on_campus_housing,false,"synthetic: src/generator/enrichment/on_campus_housing.py, seed 2026"

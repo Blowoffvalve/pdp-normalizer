@@ -5,8 +5,11 @@ This repository holds the contract for the normalized data model (GitHub issue #
 - where every column of the two mock Analysis-Ready Files goes
 - what a valid stored value looks like
 - how two example enrichment files feed in
+- what the tables look like for 10 real students
 
 Build against it now. The rest of the pipeline, which loads full data, comes later in Milestone 2.
+
+**The sample rows are real rows from the mock data, but they have not been validated.** The schema and the configs are the stable part. Values in the samples can be wrong in the same ways the mock data is.
 
 ## What's here
 
@@ -20,8 +23,11 @@ Build against it now. The rest of the pipeline, which loads full data, comes lat
 | `config/institution_events_mapping.yaml` | Where the institution events enrichment goes (`institution_event`). |
 | `normalized-data-model.mmd` | The ER diagram, in Mermaid. A picture of `destination_schema.yaml`; a test keeps the two in step. |
 | `data/input/` | The mock Analysis-Ready Files (copies of the starter repo's `data/raw/`, checked by checksum) and the two enrichment files. |
+| `data/input/sample/` | The raw rows for the 10 sample students, in the same formats. |
+| `data/output/sample/` | One CSV per table, built from `data/input/sample/` through the configs. |
+| `src/sample/build_sample.py` | Rebuilds both sample folders. |
 | `src/generator/enrichment/on_campus_housing.py` | Generates the synthetic on-campus housing file. |
-| `src/rules/rules.py` | Reads and checks the configs, and applies them to one value. |
+| `src/rules/rules.py` | Reads and checks the configs, and applies them to one value. Used by the sample builder. |
 
 ## The tables
 
@@ -132,8 +138,10 @@ Run from this folder:
 
 ```bash
 python3 -m src.generator.enrichment.on_campus_housing   # data/input/enrichment/on_campus_housing.csv
+python3 -m src.sample.build_sample                       # data/input/sample/ and data/output/sample/
 ./scripts/test_config.sh                                 # configs, schema, rule format and ER diagram
 ./scripts/test_rules.sh                                  # the rules module
+./scripts/test_sample.sh                                 # sample builder and samples
 ./scripts/test_generator.sh                              # on-campus housing generator
 ```
 

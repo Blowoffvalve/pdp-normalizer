@@ -1,0 +1,8 @@
+Student_GUID,Academic_Year,Academic_Term,Uses_On_Campus_Housing,Source
+0110949EC5F26B13E0531B64C70A9D19,2022-23,SUMMER,true,"synthetic: src/generator/enrichment/on_campus_housing.py, seed 2026"
+0110949EC5F26B13E0531B64C70A9D19,2023-24,FALL,true,"synthetic: src/generator/enrichment/on_campus_housing.py, seed 2026"
+0110949EC5F26B13E0531B64C70A9D19,2023-24,WINTER,true,"synthetic: src/generator/enrichment/on_campus_housing.py, seed 2026"
+0110949EC5F26B13E0531B64C70A9D19,2023-24,SPRING,true,"synthetic: src/generator/enrichment/on_campus_housing.py, seed 2026"
+0110949EC5F26B13E0531B64C70A9D19,2023-24,SUMMER,true,"synthetic: src/generator/enrichment/on_campus_housing.py, seed 2026"
+0110949EC5F26B13E0531B64C70A9D19,2024-25,FALL,true,"synthetic: src/generator/enrichment/on_campus_housing.py, seed 2026"
+0110949EC5F26B13E0531B64C70A9D19,2024-25,WINTER,false,"synthetic: src/generator/enrichment/on_campus_housing.py, seed 2026"
