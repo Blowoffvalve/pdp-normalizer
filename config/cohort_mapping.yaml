@@ -1,0 +1,434 @@
+# Where each column of the cohort Analysis-Ready File goes (Milestone 1 spec, SC-1). Run on every load.
+# Types are not here: they come from config/destination_schema.yaml (Milestone 1 D8).
+#
+# Each entry: source, destination_table, destination_column and on_conflict (append, replace or
+# keep: what the loader does when the destination row already holds a value).
+# A source column with no destination is marked `dropped:` with the reason.
+
+- source: Cohort
+  destination_table: cohort_membership
+  destination_column: cohort
+  on_conflict: replace
+
+- source: Student_GUID
+  destination_table: student
+  destination_column: student_id
+  on_conflict: replace
+
+- source: Student_GUID
+  destination_table: cohort_membership
+  destination_column: student_id
+  on_conflict: replace
+
+- source: Cohort_Term
+  destination_table: cohort_membership
+  destination_column: cohort_term
+  on_conflict: replace
+
+- source: Student_Age
+  destination_table: student
+  destination_column: student_age
+  on_conflict: replace   # latest cohort row wins for the 2 students with two cohort rows (D6)
+
+- source: Enrollment_Type
+  destination_table: cohort_membership
+  destination_column: enrollment_type
+  on_conflict: replace
+
+- source: Enrollment_Intensity_First_Term
+  destination_table: cohort_membership
+  destination_column: enrollment_intensity_first_term
+  on_conflict: replace
+
+- source: Math_Placement
+  destination_table: cohort_membership
+  destination_column: math_placement
+  on_conflict: replace
+
+- source: English_Placement
+  destination_table: cohort_membership
+  destination_column: english_placement
+  on_conflict: replace
+
+- source: Dual_and_Summer_Enrollment
+  destination_table: cohort_membership
+  destination_column: dual_and_summer_enrollment
+  on_conflict: replace
+
+- source: Race
+  destination_table: student
+  destination_column: race
+  on_conflict: replace   # latest cohort row wins for the 2 students with two cohort rows (D6)
+
+- source: Ethnicity
+  destination_table: student
+  destination_column: ethnicity
+  on_conflict: replace   # latest cohort row wins for the 2 students with two cohort rows (D6)
+
+- source: Gender
+  destination_table: student
+  destination_column: gender
+  on_conflict: replace   # latest cohort row wins for the 2 students with two cohort rows (D6)
+
+- source: First_Gen
+  destination_table: student
+  destination_column: first_gen
+  on_conflict: replace   # latest cohort row wins for the 2 students with two cohort rows (D6)
+
+- source: Pell_Status_First_Year
+  destination_table: cohort_membership
+  destination_column: pell_status_first_year
+  on_conflict: replace
+
+- source: Attendance_Status_Term_1
+  destination_table: cohort_membership
+  destination_column: attendance_status_term_1
+  on_conflict: replace
+
+- source: Credential_Type_Sought_Year_1
+  destination_table: cohort_membership
+  destination_column: credential_type_sought_year_1
+  on_conflict: replace
+
+- source: Program_of_Study_Term_1
+  destination_table: cohort_membership
+  destination_column: program_of_study_term_1
+  on_conflict: replace
+
+- source: GPA_Group_Term_1
+  destination_table: cohort_membership
+  destination_column: gpa_group_term_1
+  on_conflict: replace
+
+- source: GPA_Group_Year_1
+  destination_table: cohort_membership
+  destination_column: gpa_group_year_1
+  on_conflict: replace
+
+- source: Number_of_Credits_Attempted_Yr_1
+  destination_table: cohort_membership
+  destination_column: number_of_credits_attempted_yr_1
+  on_conflict: replace
+
+- source: Number_of_Credits_Earned_Yr_1
+  destination_table: cohort_membership
+  destination_column: number_of_credits_earned_yr_1
+  on_conflict: replace
+
+- source: Number_of_Credits_Attempted_Yr_2
+  destination_table: cohort_membership
+  destination_column: number_of_credits_attempted_yr_2
+  on_conflict: replace
+
+- source: Number_of_Credits_Earned_Yr_2
+  destination_table: cohort_membership
+  destination_column: number_of_credits_earned_yr_2
+  on_conflict: replace
+
+- source: Number_of_Credits_Attempted_Yr_3
+  destination_table: cohort_membership
+  destination_column: number_of_credits_attempted_yr_3
+  on_conflict: replace
+
+- source: Number_of_Credits_Earned_Yr_3
+  destination_table: cohort_membership
+  destination_column: number_of_credits_earned_yr_3
+  on_conflict: replace
+
+- source: Number_of_Credits_Attempted_Yr_4
+  destination_table: cohort_membership
+  destination_column: number_of_credits_attempted_yr_4
+  on_conflict: replace
+
+- source: Number_of_Credits_Earned_Yr_4
+  destination_table: cohort_membership
+  destination_column: number_of_credits_earned_yr_4
+  on_conflict: replace
+
+- source: Gateway_Math_Status
+  destination_table: cohort_membership
+  destination_column: gateway_math_status
+  on_conflict: replace
+
+- source: Gateway_English_Status
+  destination_table: cohort_membership
+  destination_column: gateway_english_status
+  on_conflict: replace
+
+- source: AttemptedGatewayMathYear1
+  destination_table: cohort_membership
+  destination_column: attempted_gateway_math_year1
+  on_conflict: replace
+
+- source: AttemptedGatewayEnglishYear1
+  destination_table: cohort_membership
+  destination_column: attempted_gateway_english_year1
+  on_conflict: replace
+
+- source: CompletedGatewayMathYear1
+  destination_table: cohort_membership
+  destination_column: completed_gateway_math_year1
+  on_conflict: replace
+
+- source: CompletedGatewayEnglishYear1
+  destination_table: cohort_membership
+  destination_column: completed_gateway_english_year1
+  on_conflict: replace
+
+- source: GatewayMathGradeY1
+  destination_table: cohort_membership
+  destination_column: gateway_math_grade_y1
+  on_conflict: replace
+
+- source: GatewayEnglishGradeY1
+  destination_table: cohort_membership
+  destination_column: gateway_english_grade_y1
+  on_conflict: replace
+
+- source: AttemptedDevMathY1
+  destination_table: cohort_membership
+  destination_column: attempted_dev_math_y1
+  on_conflict: replace
+
+- source: AttemptedDevEnglishY1
+  destination_table: cohort_membership
+  destination_column: attempted_dev_english_y1
+  on_conflict: replace
+
+- source: CompletedDevMathY1
+  destination_table: cohort_membership
+  destination_column: completed_dev_math_y1
+  on_conflict: replace
+
+- source: CompletedDevEnglishY1
+  destination_table: cohort_membership
+  destination_column: completed_dev_english_y1
+  on_conflict: replace
+
+- source: Retention
+  destination_table: cohort_membership
+  destination_column: retention
+  on_conflict: replace
+
+- source: Persistence
+  destination_table: cohort_membership
+  destination_column: persistence
+  on_conflict: replace
+
+- source: Years_to_BA_at_cohort_inst
+  destination_table: cohort_membership
+  destination_column: years_to_ba_at_cohort_inst
+  on_conflict: replace
+
+- source: Years_to_A_or_C_at_cohort_inst
+  destination_table: cohort_membership
+  destination_column: years_to_a_or_c_at_cohort_inst
+  on_conflict: replace
+
+- source: Years_to_BA_at_other_inst
+  destination_table: cohort_membership
+  destination_column: years_to_ba_at_other_inst
+  on_conflict: replace
+
+- source: Years_to_A_or_C_at_other_inst
+  destination_table: cohort_membership
+  destination_column: years_to_a_or_c_at_other_inst
+  on_conflict: replace
+
+- source: Years_of_Last_Enrollment_at_coho
+  destination_table: cohort_membership
+  destination_column: years_of_last_enrollment_at_coho
+  on_conflict: replace
+
+- source: Years_of_Last_Enrollment_at_othe
+  destination_table: cohort_membership
+  destination_column: years_of_last_enrollment_at_othe
+  on_conflict: replace
+
+- source: Time_to_Credential
+  destination_table: cohort_membership
+  destination_column: time_to_credential
+  on_conflict: replace
+
+- source: Reading_Placement
+  destination_table: cohort_membership
+  destination_column: reading_placement
+  on_conflict: replace
+
+- source: SpecialProgram
+  destination_table: cohort_membership
+  destination_column: special_program
+  on_conflict: replace
+
+- source: NASPAFirstGeneration
+  destination_table: cohort_membership
+  destination_column: naspa_first_generation
+  on_conflict: replace
+
+- source: IncarceratedStatus
+  destination_table: cohort_membership
+  destination_column: incarcerated_status
+  on_conflict: replace
+
+- source: MilitaryStatus
+  destination_table: cohort_membership
+  destination_column: military_status
+  on_conflict: replace
+
+- source: EmploymentStatus
+  destination_table: cohort_membership
+  destination_column: employment_status
+  on_conflict: replace
+
+- source: DisabilityStatus
+  destination_table: cohort_membership
+  destination_column: disability_status
+  on_conflict: replace
+
+- source: ForeignLanguageCompletion
+  destination_table: cohort_membership
+  destination_column: foreign_language_completion
+  on_conflict: replace
+
+- source: First_Year_to_Bachelors_at_coh
+  destination_table: cohort_membership
+  destination_column: first_year_to_bachelors_at_coh
+  on_conflict: replace
+
+- source: First_Year_to_A_or_C_at_cohort
+  destination_table: cohort_membership
+  destination_column: first_year_to_a_or_c_at_cohort
+  on_conflict: replace
+
+- source: First_Year_to_Bachelor_at_other
+  destination_table: cohort_membership
+  destination_column: first_year_to_bachelor_at_other
+  on_conflict: replace
+
+- source: First_Year_to_A_or_C_at_other
+  destination_table: cohort_membership
+  destination_column: first_year_to_a_or_c_at_other
+  on_conflict: replace
+
+- source: Program_of_Study_Year_1
+  destination_table: cohort_membership
+  destination_column: program_of_study_year_1
+  on_conflict: replace
+
+- source: S_Most_Recent_Bachelors_at_O_I
+  destination_table: cohort_membership
+  destination_column: s_most_recent_bachelors_at_o_i
+  on_conflict: replace
+
+- source: S_Most_Recent_Associates_or_C
+  destination_table: cohort_membership
+  destination_column: s_most_recent_associates_or_c
+  on_conflict: replace
+
+- source: S_Most_Recent_Last_Enroll_at_O
+  destination_table: cohort_membership
+  destination_column: s_most_recent_last_enroll_at_o
+  on_conflict: replace
+
+- source: S_First_Bachelors_at_Other_Ins
+  destination_table: cohort_membership
+  destination_column: s_first_bachelors_at_other_ins
+  on_conflict: replace
+
+- source: S_First_Associates_or_Cert
+  destination_table: cohort_membership
+  destination_column: s_first_associates_or_cert
+  on_conflict: replace
+
+- source: C_Most_Recent_Bachelors_at_O_I
+  destination_table: cohort_membership
+  destination_column: c_most_recent_bachelors_at_o_i
+  on_conflict: replace
+
+- source: C_Most_Recent_Associates_or_C
+  destination_table: cohort_membership
+  destination_column: c_most_recent_associates_or_c
+  on_conflict: replace
+
+- source: C_Most_Recent_Last_Enroll_at_O
+  destination_table: cohort_membership
+  destination_column: c_most_recent_last_enroll_at_o
+  on_conflict: replace
+
+- source: C_First_Bachelors_at_Other_Ins
+  destination_table: cohort_membership
+  destination_column: c_first_bachelors_at_other_ins
+  on_conflict: replace
+
+- source: C_First_Associates_or_Cert
+  destination_table: cohort_membership
+  destination_column: c_first_associates_or_cert
+  on_conflict: replace
+
+- source: L_Most_Recent_Bachelors_at_O_I
+  destination_table: cohort_membership
+  destination_column: l_most_recent_bachelors_at_o_i
+  on_conflict: replace
+
+- source: L_Most_Recent_Associates_or_C
+  destination_table: cohort_membership
+  destination_column: l_most_recent_associates_or_c
+  on_conflict: replace
+
+- source: L_Most_Recent_Last_Enroll_at_O
+  destination_table: cohort_membership
+  destination_column: l_most_recent_last_enroll_at_o
+  on_conflict: replace
+
+- source: L_First_Bachelors_at_Other_Ins
+  destination_table: cohort_membership
+  destination_column: l_first_bachelors_at_other_ins
+  on_conflict: replace
+
+- source: L_First_Associates_or_Cert
+  destination_table: cohort_membership
+  destination_column: l_first_associates_or_cert
+  on_conflict: replace
+
+- source: Years_to_Latest_Associates_at_Co
+  destination_table: cohort_membership
+  destination_column: years_to_latest_associates_at_co
+  on_conflict: replace
+
+- source: Years_to_Latest_Certificate_at_C
+  destination_table: cohort_membership
+  destination_column: years_to_latest_certificate_at_c
+  on_conflict: replace
+
+- source: Years_to_Latest_Associates_at_Ot
+  destination_table: cohort_membership
+  destination_column: years_to_latest_associates_at_ot
+  on_conflict: replace
+
+- source: Years_to_Latest_Certificate_at_O
+  destination_table: cohort_membership
+  destination_column: years_to_latest_certificate_at_o
+  on_conflict: replace
+
+- source: First_Year_to_Associates_at_Coho
+  destination_table: cohort_membership
+  destination_column: first_year_to_associates_at_coho
+  on_conflict: replace
+
+- source: First_Year_to_Certificate_at_Coh
+  destination_table: cohort_membership
+  destination_column: first_year_to_certificate_at_coh
+  on_conflict: replace
+
+- source: First_Year_to_Associates_at_Othe
+  destination_table: cohort_membership
+  destination_column: first_year_to_associates_at_othe
+  on_conflict: replace
+
+- source: First_Year_to_Certificate_at_Oth
+  destination_table: cohort_membership
+  destination_column: first_year_to_certificate_at_oth
+  on_conflict: replace
+
+- source: researchid
+  dropped: one constant value per file (cohort2026atd); no destination in the sanctioned schema

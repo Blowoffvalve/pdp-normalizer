@@ -1,0 +1,191 @@
+# Where each column of the course Analysis-Ready File goes (Milestone 1 spec, SC-1). Run on every load.
+# Types are not here: they come from config/destination_schema.yaml (Milestone 1 D8).
+#
+# Each entry: source, destination_table, destination_column and on_conflict (append, replace or
+# keep: what the loader does when the destination row already holds a value).
+# A source column with no destination is marked `dropped:` with the reason.
+# 17,755 rows have no course record (the student was enrolled elsewhere that term, or the term is
+# unknown): course fields are blank on those rows, and course_enrollment.course_id is blank (M1 P9).
+
+- source: Student_GUID
+  destination_table: course_enrollment
+  destination_column: student_id
+  on_conflict: replace
+
+- source: Student_GUID
+  destination_table: student
+  destination_column: student_id
+  on_conflict: keep         # finds the student row the cohort file wrote
+
+- source: Student_GUID
+  destination_table: cohort_membership
+  destination_column: student_id
+  on_conflict: keep         # with Cohort, finds the cohort row the cohort file wrote
+
+- source: Student_Age
+  destination_table: student
+  destination_column: student_age
+  on_conflict: keep         # always equals the cohort file's value today
+
+- source: Race
+  destination_table: student
+  destination_column: race
+  on_conflict: keep
+
+- source: Ethnicity
+  destination_table: student
+  destination_column: ethnicity
+  on_conflict: keep
+
+- source: Gender
+  destination_table: student
+  destination_column: gender
+  on_conflict: keep
+
+- source: Cohort
+  destination_table: cohort_membership
+  destination_column: cohort
+  on_conflict: keep
+
+- source: Cohort_Term
+  destination_table: cohort_membership
+  destination_column: cohort_term
+  on_conflict: append       # D1; Q-C, open question for Dena (/dev/color): the dictionary defines it as "term student first enrolled in at least one course"
+
+- source: Academic_Year
+  destination_table: term
+  destination_column: academic_year
+  on_conflict: replace
+
+- source: Academic_Term
+  destination_table: term
+  destination_column: academic_term
+  on_conflict: replace
+
+- source: Course_Prefix
+  destination_table: course
+  destination_column: course_prefix
+  on_conflict: replace
+
+- source: Course_Number
+  destination_table: course
+  destination_column: course_number
+  on_conflict: replace
+
+- source: Section_ID
+  destination_table: course_enrollment
+  destination_column: section_id
+  on_conflict: replace
+
+- source: Course_Name
+  destination_table: course_enrollment
+  destination_column: course_name
+  on_conflict: replace
+
+- source: Course_CIP
+  destination_table: course_enrollment
+  destination_column: course_cip
+  on_conflict: replace
+
+- source: Course_Type
+  destination_table: course_enrollment
+  destination_column: course_type
+  on_conflict: replace
+
+- source: Math_or_English_Gateway
+  destination_table: course_enrollment
+  destination_column: math_or_english_gateway
+  on_conflict: replace
+
+- source: Co_requisite_Course
+  destination_table: course_enrollment
+  destination_column: co_requisite_course
+  on_conflict: replace
+
+- source: Course_Begin_Date
+  destination_table: course_enrollment
+  destination_column: course_begin_date
+  on_conflict: replace
+
+- source: Course_End_Date
+  destination_table: course_enrollment
+  destination_column: course_end_date
+  on_conflict: replace
+
+- source: Grade
+  destination_table: course_enrollment
+  destination_column: grade
+  on_conflict: replace
+
+- source: Number_of_Credits_Attempted
+  destination_table: course_enrollment
+  destination_column: number_of_credits_attempted
+  on_conflict: replace
+
+- source: Number_of_Credits_Earned
+  destination_table: course_enrollment
+  destination_column: number_of_credits_earned
+  on_conflict: replace
+
+- source: Delivery_Method
+  destination_table: course_enrollment
+  destination_column: delivery_method
+  on_conflict: replace
+
+- source: Core_Course
+  destination_table: course_enrollment
+  destination_column: core_course
+  on_conflict: replace
+
+- source: Core_Course_Type
+  destination_table: course_enrollment
+  destination_column: core_course_type
+  on_conflict: replace
+
+- source: Core_Competency_Completed
+  destination_table: course_enrollment
+  destination_column: core_competency_completed
+  on_conflict: replace
+
+- source: Enrolled_at_Other_Institution_s_
+  destination_table: course_enrollment
+  destination_column: enrolled_at_other_institution_s
+  on_conflict: replace
+
+- source: Credential_Engine_Identifier
+  destination_table: course_enrollment
+  destination_column: credential_engine_identifier
+  on_conflict: replace
+
+- source: Course_Instructor_Employment_Sta
+  destination_table: course_enrollment
+  destination_column: course_instructor_employment_sta
+  on_conflict: replace
+
+- source: Course_Instructor_Rank
+  destination_table: course_enrollment
+  destination_column: course_instructor_rank
+  on_conflict: replace
+
+- source: S_Enrollment_Record_at_other
+  destination_table: course_enrollment
+  destination_column: s_enrollment_record_at_other
+  on_conflict: replace
+
+- source: C_Enrollment_Record_at_other
+  destination_table: course_enrollment
+  destination_column: c_enrollment_record_at_other
+  on_conflict: replace
+
+- source: L_Enrollment_Record_at_other
+  destination_table: course_enrollment
+  destination_column: l_enrollment_record_at_other
+  on_conflict: replace
+
+- source: Term_Program_of_Study
+  destination_table: course_enrollment
+  destination_column: term_program_of_study
+  on_conflict: replace
+
+- source: researchid
+  dropped: one constant value per file (course2026atd); no destination in the sanctioned schema
